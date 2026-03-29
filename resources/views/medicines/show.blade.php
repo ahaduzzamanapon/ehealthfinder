@@ -178,98 +178,91 @@ input:checked + .slider:before {
 }
 </style>
 
-<div class="bc" style="margin-bottom: 1.5rem">
-    <a href="{{ route('medicines.index') }}" style="color:var(--text); text-decoration:underline">Medicines</a> &raquo;
-    <strong>{{ $brand->name }}</strong>
-</div>
 
-<!-- TOP HERO CARD -->
-<div class="card" style="margin-bottom: 2rem; display:flex; flex-wrap:wrap; gap: 3rem; position:relative;">
-    
-    <!-- Lang Switcher Positioned Top Right -->
-    <div style="position: absolute; top: 1.5rem; right: 1.5rem;" class="lang-toggle-wrapper">
-        <span class="lang-label en active" id="label-en">EN</span>
+{{-- PREMIUM MEDICINE HERO --}}
+<div class="med-profile-hero">
+
+    {{-- Lang Toggle --}}
+    <div class="lang-toggle-wrapper" style="position:absolute; top:1.5rem; right:1.5rem; z-index:2;">
+        <span class="lang-label en active" id="label-en" style="color:rgba(255,255,255,0.9); font-weight:700;">EN</span>
         <label class="switch">
             <input type="checkbox" id="langToggle">
             <span class="slider"></span>
         </label>
-        <span class="lang-label bn" id="label-bn">বাং</span>
+        <span class="lang-label bn" id="label-bn" style="color:rgba(255,255,255,0.7); font-weight:700;">বাং</span>
     </div>
 
-    @if($brand->image_path)
-    <div style="flex: 0 0 140px; max-width:140px; position:relative;" id="med-img-wrap">
-        @php $safeImg = str_replace('\\', '/', $brand->image_path); @endphp
-        <img id="med-thumb"
-             src="{{ Str::startsWith($safeImg, 'http') ? $safeImg : asset($safeImg) }}" 
-             style="width: 140px; height: 140px; border-radius: 12px; border: 2px solid var(--gray); box-shadow: var(--shadow); object-fit: contain; background: white; cursor: zoom-in; transition: border-color 0.2s;" 
-             alt="{{ $brand->name }}"
-             onmouseenter="showMedPreview(this)" onmouseleave="hideMedPreview()">
-
-        <!-- Hover Preview -->
-        <div id="med-preview-box" style="
-            display:none;
-            position:fixed;
-            z-index:9999;
-            background:white;
-            border-radius:16px;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.25);
-            border: 1px solid #e2e8f0;
-            padding: 12px;
-            pointer-events:none;
-        ">
-            <img id="med-preview-img"
-                 src="{{ Str::startsWith($safeImg, 'http') ? $safeImg : asset($safeImg) }}"
-                 style="width:320px; height:320px; object-fit:contain; border-radius:8px; display:block;"
-                 alt="{{ $brand->name }}">
-        </div>
+    {{-- Medicine Image --}}
+    <div class="med-img-panel" id="med-img-wrap">
+        @if($brand->image_path)
+            @php $safeImg = str_replace('\\', '/', $brand->image_path); @endphp
+            <img id="med-thumb"
+                 src="{{ Str::startsWith($safeImg,'http') ? $safeImg : asset($safeImg) }}"
+                 alt="{{ $brand->name }}"
+                 onmouseenter="showMedPreview(this)" onmouseleave="hideMedPreview()">
+            {{-- Hover Preview --}}
+            <div id="med-preview-box" style="display:none;position:fixed;z-index:9999;background:white;border-radius:16px;box-shadow:0 25px 80px rgba(0,0,0,0.25);border:1px solid #e2e8f0;padding:12px;pointer-events:none;">
+                <img id="med-preview-img" src="{{ Str::startsWith($safeImg,'http') ? $safeImg : asset($safeImg) }}" style="width:320px;height:320px;object-fit:contain;border-radius:8px;display:block;" alt="{{ $brand->name }}">
+            </div>
+        @else
+            <div style="font-size:5rem;opacity:0.35;">💊</div>
+        @endif
     </div>
-    @endif
 
-    <script>
-    function showMedPreview(thumb) {
-        const box = document.getElementById('med-preview-box');
-        const rect = thumb.getBoundingClientRect();
-        box.style.display = 'block';
-        // Position: right of the thumb + 20px gap, vertically centered
-        const top = Math.max(10, rect.top + rect.height/2 - 172);
-        const left = rect.right + 20;
-        box.style.top  = top + 'px';
-        box.style.left = left + 'px';
-        thumb.style.borderColor = 'var(--primary)';
-    }
-    function hideMedPreview() {
-        document.getElementById('med-preview-box').style.display = 'none';
-        const thumb = document.getElementById('med-thumb');
-        if(thumb) thumb.style.borderColor = 'var(--gray)';
-    }
-    </script>
-    
-    <div style="flex: 1; min-width: 300px; padding-top: 1rem;">
-        <div style="display:flex; align-items:center; gap: 1rem; margin-bottom: 0.5rem">
-            <h1 style="margin: 0; font-size: 2.5rem; color: var(--primary-dark)">{{ $brand->name }}</h1>
+    {{-- Medicine Info --}}
+    <div class="med-hero-info-panel">
+        <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap; margin-bottom:0.5rem;">
+            <h1 style="margin:0; font-size:2.2rem; font-weight:800; color:white; text-shadow:0 2px 10px rgba(0,0,0,0.2);">{{ $brand->name }}</h1>
             @if($brand->is_antibiotic)
-                <span style="background:#fed7d7; color:#c53030; font-size: 0.9rem; padding: 4px 12px; border-radius: 50px; font-weight:700; box-shadow: 0 2px 4px rgba(197,48,48,0.2)">Antibiotic</span>
+                <span style="background:rgba(255,100,100,0.3);border:1px solid rgba(255,120,120,0.5);color:white;padding:4px 14px;border-radius:50px;font-size:0.82rem;font-weight:700;">⚠ Antibiotic</span>
             @endif
         </div>
-        
-        <h3 style="color: var(--text); font-weight: 500; margin-top:0; font-size: 1.2rem;">{{ $brand->dosage_form }}</h3>
-        
-        <div style="margin-top: 2rem; background: rgba(248, 250, 252, 0.6); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.8); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
-            <div>
-                <strong style="color: var(--text-light); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Generic Name</strong> <br>
-                <span style="color: var(--primary); font-size: 1.3rem; font-weight: 700">{{ $brand->generic->name ?? 'Unknown' }}</span>
+        <p style="color:rgba(255,255,255,0.8); font-size:1.1rem; margin:0 0 1.5rem; font-style:italic;">{{ $brand->dosage_form }}</p>
+
+        <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+            @if($brand->generic)
+                <span class="profile-pill">🧬 {{ $brand->generic->name }}</span>
+            @endif
+            @if($brand->company)
+                <span class="profile-pill">🏭 {{ $brand->company }}</span>
+            @endif
+        </div>
+
+        <div class="med-hero-stats">
+            <div class="med-stat-box">
+                <div class="med-stat-label">GENERIC NAME</div>
+                <div class="med-stat-val">{{ $brand->generic->name ?? '—' }}</div>
             </div>
-            <div>
-                <strong style="color: var(--text-light); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Manufacturer</strong> <br>
-                <span style="font-size: 1.1rem; font-weight: 600; color: var(--text);">{{ $brand->company }}</span>
+            <div class="med-stat-box">
+                <div class="med-stat-label">MANUFACTURER</div>
+                <div class="med-stat-val">{{ $brand->company ?: '—' }}</div>
             </div>
-            <div>
-                <strong style="color: var(--text-light); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Unit Price</strong> <br>
-                <span style="font-size: 1.6rem; font-weight: 800; color: #10b981">{{ $brand->price }}</span>
+            <div class="med-stat-box price-box">
+                <div class="med-stat-label">UNIT PRICE</div>
+                <div class="med-stat-val price">{{ $brand->price ?: 'N/A' }}</div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function showMedPreview(thumb) {
+    const box = document.getElementById('med-preview-box');
+    const rect = thumb.getBoundingClientRect();
+    box.style.display = 'block';
+    const top = Math.max(10, rect.top + rect.height/2 - 172);
+    const left = rect.right + 20;
+    box.style.top  = top + 'px';
+    box.style.left = left + 'px';
+    thumb.style.borderColor = 'rgba(255,255,255,0.9)';
+}
+function hideMedPreview() {
+    document.getElementById('med-preview-box').style.display = 'none';
+    const thumb = document.getElementById('med-thumb');
+    if(thumb) thumb.style.borderColor = 'rgba(255,255,255,0.3)';
+}
+</script>
+
 
 @php
     $sections = [

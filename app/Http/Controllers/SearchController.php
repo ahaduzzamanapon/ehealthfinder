@@ -48,7 +48,16 @@ class SearchController extends Controller
         $locations   = Location::orderBy('name')->get();
         $specialties = Specialty::orderBy('name')->get();
 
-        return view('doctors.index', compact('doctors', 'locations', 'specialties'));
+        // For dynamic SEO meta
+        $selectedSpecialty = $request->filled('specialty_id')
+            ? Specialty::find($request->specialty_id) : null;
+        $selectedLocation  = $request->filled('location_id')
+            ? Location::find($request->location_id) : null;
+
+        return view('doctors.index', compact(
+            'doctors', 'locations', 'specialties',
+            'selectedSpecialty', 'selectedLocation'
+        ));
     }
 
     public function searchMedicines(Request $request)

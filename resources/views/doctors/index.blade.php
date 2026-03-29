@@ -1,19 +1,104 @@
 @extends('layouts.app')
 
-@section('title', 'Find Specialist Doctors in Bangladesh | eHealthFinder')
-@section('meta_description', 'Browse ' . $doctors->total() . ' verified specialist doctors across Bangladesh. Filter by city and specialty to book your appointment.')
-@section('meta_keywords', 'specialist doctor Bangladesh, find doctor online, doctor appointment Bangladesh, best doctor dhaka, ehealthfinder')
-@section('og_title', 'Find Specialist Doctors in Bangladesh | eHealthFinder')
-@section('og_description', 'Search verified specialist doctors across Bangladesh by location and specialty.')
+@php
+    $spec = $selectedSpecialty->name ?? null;
+    $loc  = $selectedLocation->name  ?? null;
+    $q    = request('q');
+
+    // ── Build dynamic title ──────────────────────────────────
+    if ($spec && $loc) {
+        $seoTitle = "{$spec} in {$loc} | Best {$spec} Doctors in {$loc} | eHealthFinder";
+        $seoH1    = "{$spec} in {$loc}";
+    } elseif ($spec) {
+        $seoTitle = "Best {$spec} in Bangladesh | Find {$spec} Doctors | eHealthFinder";
+        $seoH1    = "Best {$spec} Doctors in Bangladesh";
+    } elseif ($loc) {
+        $seoTitle = "Best Doctors in {$loc} | Find Specialist Doctors in {$loc} | eHealthFinder";
+        $seoH1    = "Specialist Doctors in {$loc}";
+    } elseif ($q) {
+        $seoTitle = "Doctors for \"{$q}\" | eHealthFinder";
+        $seoH1    = "Search Results for \"{$q}\"";
+    } else {
+        $seoTitle = "Find Specialist Doctors in Bangladesh | eHealthFinder";
+        $seoH1    = "Doctor Directory";
+    }
+
+    // ── Build dynamic description ───────────────────────────
+    $total = $doctors->total();
+    if ($spec && $loc) {
+        $seoDesc = "Find {$total} verified {$spec} doctors in {$loc}, Bangladesh. View chamber address, visiting hours, appointment numbers and book your consultation on eHealthFinder.";
+    } elseif ($spec) {
+        $seoDesc = "Browse {$total} verified {$spec} specialists across Bangladesh. Compare qualifications, location, and availability. Book appointments on eHealthFinder.";
+    } elseif ($loc) {
+        $seoDesc = "Find {$total} verified specialist doctors in {$loc}. Filter by specialty, view chamber details and appointment numbers. eHealthFinder Bangladesh.";
+    } elseif ($q) {
+        $seoDesc = "Found {$total} doctors matching \"{$q}\" in Bangladesh. View profiles, specialties, chambers and book appointments on eHealthFinder.";
+    } else {
+        $seoDesc = "Browse {$total} verified specialist doctors across Bangladesh. Filter by city and specialty to find the right doctor and book your appointment.";
+    }
+
+    // ── Build dynamic keywords ──────────────────────────────
+    if ($spec && $loc) {
+        $seoKeys = implode(', ', [
+            "{$spec} in {$loc}",
+            "best {$spec} {$loc}",
+            "{$spec} doctor {$loc} Bangladesh",
+            "find {$spec} in {$loc}",
+            "{$spec} specialist {$loc}",
+            "{$loc} {$spec} appointment",
+            "specialist doctor {$loc}",
+            "doctor {$loc} Bangladesh",
+        ]);
+    } elseif ($spec) {
+        $seoKeys = implode(', ', [
+            "best {$spec} in Bangladesh",
+            "{$spec} doctor Bangladesh",
+            "{$spec} specialist Bangladesh",
+            "find {$spec} Bangladesh",
+            "{$spec} appointment Bangladesh",
+            "{$spec} doctor Dhaka",
+            "{$spec} doctor Chittagong",
+            "specialist {$spec}",
+        ]);
+    } elseif ($loc) {
+        $seoKeys = implode(', ', [
+            "best doctor in {$loc}",
+            "specialist doctor {$loc}",
+            "find doctor {$loc} Bangladesh",
+            "doctor appointment {$loc}",
+            "{$loc} specialist doctor",
+            "{$loc} hospital doctor",
+            "best specialist {$loc}",
+            "doctor {$loc}",
+        ]);
+    } else {
+        $seoKeys = 'specialist doctor Bangladesh, find doctor online, doctor appointment Bangladesh, best doctor dhaka, ehealthfinder, specialist doctor near me';
+    }
+
+    // ── Canonical URL ───────────────────────────────────────
+    $canonicalParams = array_filter([
+        'specialty_id' => request('specialty_id'),
+        'location_id'  => request('location_id'),
+    ]);
+    $seoCanonical = route('doctors.index', $canonicalParams);
+@endphp
+
+@section('title',            $seoTitle)
+@section('meta_description', $seoDesc)
+@section('meta_keywords',    $seoKeys)
+@section('og_title',         $seoTitle)
+@section('og_description',   $seoDesc)
+@section('canonical',        $seoCanonical)
 
 @section('content')
 
 {{-- Page Header --}}
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
     <div>
-        <h1 style="margin:0; font-size:1.8rem;">🩺 Doctor Directory</h1>
+        <h1 style="margin:0; font-size:1.8rem;">🩺 {{ $seoH1 }}</h1>
         <p style="margin:0.4rem 0 0; color:var(--text-light); font-size:0.95rem;">
-            Showing <strong style="color:var(--primary);">{{ $doctors->total() }}</strong> verified professionals
+            Showing <strong style="color:var(--primary);">{{ $doctors->total() }}</strong>
+            {{ $spec && $loc ? "{$spec} doctors in {$loc}" : ($spec ? "{$spec} specialists" : ($loc ? "doctors in {$loc}" : 'verified professionals')) }}
         </p>
     </div>
 </div>
