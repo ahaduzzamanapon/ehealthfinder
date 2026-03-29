@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Doctor;
 use App\Models\Brand;
 use App\Models\Generic;
@@ -248,5 +249,41 @@ class SearchController extends Controller
             ])->toArray();
 
         return response()->json(array_slice(array_merge($results, $doctors), 0, 10));
+    }
+
+    /**
+     * /api/quick-links  — cached 6 hours
+     * Returns up to 80 specialty×location combos that have ≥1 doctor.
+     */
+    public function quickLinks()
+    {
+        $links = Cache::remember('quick_links', 60 * 360, function () {
+            $specialties = Specialty::orderBy('name')->get();
+            $locations   = Location::orderBy('name')->get();
+
+            $rows = [];
+            foreach ($specialties as $spec) {
+                foreach ($locations as $loc) {
+                    $cnt = Doctor::where('specialty_id', $spec->id)
+                                 ->where('location_id',  $loc->id)
+                                 ->count();
+                    if ($cnt > 0) {
+                        $rows[] = [
+                            'label' => $spec->name . ' in ' . $loc->name,
+                            'count' => $cnt . ' doctors',
+                            'url'   => route('doctors.index', [
+                                'specialty_id' => $spec->id,
+                                'location_id'  => $loc->id,
+                            ]),
+                        ];
+                    }
+                }
+            }
+
+            // Shuffle and return a manageable subset
+            return collect($rows)->shuffle()->take(80)->values()->all();
+        });
+
+        return response()->json($links);
     }
 }

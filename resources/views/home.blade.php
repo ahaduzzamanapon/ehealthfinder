@@ -145,49 +145,53 @@
     $qlLocs  = $locations;     /* all locations  */
 @endphp
 
-<!-- ═══ POPULAR SEARCHES QUICK LINKS ═══ -->
+<!-- ═══ POPULAR SEARCHES QUICK LINKS (lazy loaded) ═══ -->
 <div class="section-head" style="margin-bottom:1.5rem; margin-top:1rem;">
     <h2>Popular <span>Doctor Searches</span></h2>
-    <p style="color:var(--text-light); font-size:0.95rem; margin-top:0.5rem;">Find the right specialist in your city — click any link below to browse verified doctors.</p>
+    <p style="color:var(--text-light); font-size:0.95rem; margin-top:0.5rem;">Find the right specialist in your city — click any link below.</p>
 </div>
-
-<div id="ql-wrapper" style="margin-bottom:3.5rem;">
-    @php
-        $qlLinks = [];
-        foreach($qlSpecs as $s) {
-            foreach($qlLocs as $l) {
-                $cnt = Doctor::where('specialty_id',$s->id)->where('location_id',$l->id)->count();
-                if($cnt > 0) {
-                    $qlLinks[] = [
-                        'label' => $s->name.' in '.$l->name,
-                        'sub'   => $cnt.' doctors',
-                        'url'   => route('doctors.index', ['specialty_id'=>$s->id,'location_id'=>$l->id]),
-                    ];
-                }
-            }
-        }
-        /* Sort by count desc — already structured above;
-           shuffle and show first 60 to keep page manageable */
-        $qlLinks = collect($qlLinks)->shuffle()->take(60)->values();
-    @endphp
-
-    @if($qlLinks->isNotEmpty())
-        <div style="display:flex; flex-wrap:wrap; gap:0.6rem;">
-            @foreach($qlLinks as $ql)
-                <a href="{{ $ql['url'] }}" class="ql-pill">
-                    <span class="ql-icon">🔍</span>
-                    <span class="ql-text">{{ $ql['label'] }}</span>
-                    <span class="ql-count">{{ $ql['sub'] }}</span>
-                </a>
-            @endforeach
-            <a href="{{ route('doctors.index') }}" class="ql-pill ql-pill-more">
-                Browse All Doctors &rarr;
-            </a>
-        </div>
-    @endif
+<div id="ql-wrapper" style="margin-bottom:3.5rem; min-height:80px;">
+    {{-- Skeleton loader --}}
+    <div id="ql-skeleton" style="display:flex; flex-wrap:wrap; gap:0.6rem;">
+        @for($i=0;$i<12;$i++)
+            <span style="height:32px; width:{{ 100+($i%5)*30 }}px; background:linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 50%,#e2e8f0 75%); background-size:400px 100%; animation:shimmer 1.4s infinite; border-radius:50px; display:inline-block;"></span>
+        @endfor
+    </div>
+    <div id="ql-content" style="display:none; flex-wrap:wrap; gap:0.6rem;"></div>
 </div>
+<style>
+@keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+</style>
+<script>
+(function(){
+    // Load quick links after page is idle / fully painted
+    const load = () => {
+        fetch('/api/quick-links')
+            .then(r => r.json())
+            .then(links => {
+                const wrap = document.getElementById('ql-content');
+                document.getElementById('ql-skeleton').style.display = 'none';
+                wrap.style.display = 'flex';
+                wrap.innerHTML = links.map(l =>
+                    `<a href="${l.url}" class="ql-pill">
+                        <span class="ql-icon">🔍</span>
+                        <span class="ql-text">${l.label}</span>
+                        <span class="ql-count">${l.count}</span>
+                    </a>`
+                ).join('') +
+                `<a href="/doctors" class="ql-pill ql-pill-more">Browse All Doctors &rarr;</a>`;
+            })
+            .catch(() => document.getElementById('ql-skeleton').style.display = 'none');
+    };
+    // Use requestIdleCallback if available, else setTimeout
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(load, { timeout: 3000 });
+    } else {
+        setTimeout(load, 300);
+    }
+})();
+</script>
 
-<!-- STATS CARDS (below quick links) -->
 <div class="section-head" style="margin-bottom: 1.5rem;">
     <h2>Browse by <span>Specialty</span></h2>
 </div>

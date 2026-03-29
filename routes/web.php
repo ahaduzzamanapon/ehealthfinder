@@ -27,3 +27,4 @@ Route::get('/api/suggest/doctors',  [SearchController::class, 'suggestDoctors'])
 Route::get('/api/suggest/medicines',[SearchController::class, 'suggestMedicines'])->name('api.suggest.medicines');
 Route::get('/api/suggest/all',      [SearchController::class, 'suggestAll'])->name('api.suggest.all');
 Route::get('/api/suggest/combined', [SearchController::class, 'suggestCombined'])->name('api.suggest.combined');
+Route::get('/api/quick-links',      [SearchController::class, 'quickLinks'])->name('api.quick-links');
