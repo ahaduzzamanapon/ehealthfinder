@@ -107,10 +107,11 @@
             <div class="footer-col">
                 <h3>Quick Links</h3>
                 <ul class="footer-links">
-                    <li><a href="{{ route('doctors.index', ['location_id' => '']) }}">Doctors in Dhaka</a></li>
-                    <li><a href="{{ route('doctors.index', ['location_id' => '']) }}">Doctors in Chittagong</a></li>
-                    <li><a href="{{ route('doctors.index', ['location_id' => '']) }}">Doctors in Rangpur</a></li>
-                    <li><a href="{{ route('doctors.index', ['location_id' => '']) }}">Doctors in Sylhet</a></li>
+                    <li><a href="{{ route('doctors.index', ['location_id' => 1]) }}">Doctors in Dhaka</a></li>
+                    <li><a href="{{ route('doctors.index', ['location_id' => 2]) }}">Doctors in Chittagong</a></li>
+                    <li><a href="{{ route('doctors.index', ['location_id' => 4]) }}">Doctors in Sylhet</a></li>
+                    <li><a href="{{ route('doctors.index', ['location_id' => 15]) }}">Doctors in Rangpur</a></li>
+                    <li><a href="{{ route('doctors.index', ['location_id' => 9]) }}">Doctors in Rajshahi</a></li>
                     <li><a href="/sitemap.xml">🗺️ Sitemap</a></li>
                 </ul>
             </div>

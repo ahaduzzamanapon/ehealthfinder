@@ -141,11 +141,20 @@ main {
 .hero {
     position: relative;
     border-radius: 28px;
-    overflow: hidden;
+    overflow: visible;
     background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 40%, #06b6d4 100%);
-    padding: 4.5rem 3rem;
+    padding: 4.5rem 3rem 5rem;
     margin-bottom: 3.5rem;
     text-align: center;
+}
+/* Inner clip mask so the dotted background stays inside */
+.hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    overflow: hidden;
+    pointer-events: none;
 }
 .hero::before {
     content: '';
