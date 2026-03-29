@@ -6,7 +6,7 @@
     $safeImg    = str_replace('\\', '/', $doctor->image_path ?? '');
     $imgUrl     = $safeImg ? (Str::startsWith($safeImg, 'http') ? $safeImg : asset($safeImg)) : null;
     $docUrl     = route('doctor.show', ['idslug' => $doctor->id . '-' . Str::slug($doctor->name)]);
-    $ogImg      = $imgUrl ?? asset('images/og-default.png');
+    $ogImg      = $imgUrl ?? asset('logo.png');
 
     // Build JSON-LD as a PHP string to avoid Blade @if nesting inside @section
     $chambers = [];

@@ -5,7 +5,7 @@
     $medUrl   = route('medicine.show', ['id' => $brand->id, 'slug' => $brand->slug]);
     $safeImg  = str_replace('\\', '/', $brand->image_path ?? '');
     $imgUrl   = $safeImg ? (Str::startsWith($safeImg, 'http') ? $safeImg : asset($safeImg)) : null;
-    $ogImg    = $imgUrl ?? asset('images/og-default.png');
+    $ogImg    = $imgUrl ?? asset('logo.png');
     $titleStr = "{$brand->name} {$brand->dosage_form} \u2013 Price, Uses & Side Effects";
     $descStr  = "{$brand->name} {$brand->dosage_form} by {$brand->company}. Generic: {$generic}. Price: {$brand->price}. Find indications, dosage, side effects and alternatives on eHealthFinder.";
 

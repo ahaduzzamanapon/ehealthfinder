@@ -16,25 +16,37 @@
     <meta property="og:title"       content="@yield('og_title', 'eHealthFinder | Find Specialist Doctors & Medicine in Bangladesh')">
     <meta property="og:description" content="@yield('og_description', 'Search verified specialist doctors and medicine information across Bangladesh.')">
     <meta property="og:url"         content="{{ url()->current() }}">
-    <meta property="og:image"       content="@yield('og_image', asset('images/og-default.png'))">
+    <meta property="og:image"       content="@yield('og_image', asset('logo.png'))">
+    <meta property="og:image:secure_url" content="@yield('og_image', asset('logo.png'))">
+    <meta property="og:image:width"  content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt"    content="@yield('og_title', 'eHealthFinder')">
     <meta property="og:site_name"   content="eHealthFinder">
+    <meta property="og:locale"      content="en_US">
 
     {{-- TWITTER CARD --}}
     <meta name="twitter:card"        content="summary_large_image">
     <meta name="twitter:title"       content="@yield('og_title', 'eHealthFinder')">
     <meta name="twitter:description" content="@yield('og_description', 'Find specialist doctors and medicines in Bangladesh.')">
-    <meta name="twitter:image"       content="@yield('og_image', asset('images/og-default.png'))">
+    <meta name="twitter:image"       content="@yield('og_image', asset('logo.png'))">
+    <meta name="twitter:image:alt"   content="@yield('og_title', 'eHealthFinder')">
+    <meta name="twitter:site"        content="@ehealthfinder">
 
     {{-- JSON-LD STRUCTURED DATA (per-page) --}}
     @yield('schema')
+
+    {{-- FAVICON --}}
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}">
 
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 </head>
 <body>
     <header>
         <div class="nav-container">
-            <a href="{{ route('home') }}" class="logo">
-                <span style="font-size:1.8rem">🩺</span> eHealthFinder
+            <a href="{{ route('home') }}" class="logo" style="-webkit-text-fill-color:initial; background:none;">
+                <img src="{{ asset('logo.png') }}" alt="eHealthFinder" style="height:42px; width:auto; display:block;">
             </a>
             
             <button class="mobile-toggle" onclick="document.querySelector('.nav-links').classList.toggle('active')">
@@ -60,7 +72,7 @@
         <div class="footer-grid">
             <div class="footer-col footer-about">
                 <a href="{{ route('home') }}" class="footer-logo">
-                    <span style="font-size:1.8rem">🩺</span> eHealthFinder
+                    <img src="{{ asset('logo.png') }}" alt="eHealthFinder" style="height:38px; width:auto; filter:brightness(0) invert(1);">
                 </a>
                 <p>Leading healthcare portal in Bangladesh. Find expert doctors, discover accurate medicine information, and make informed medical decisions.</p>
             </div>

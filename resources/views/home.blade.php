@@ -40,41 +40,7 @@
             <div id="smart-dropdown" style="display:none; position:absolute; top:calc(100% + 8px); left:0; right:0; background:white; border-radius:16px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); z-index:1000; overflow-y:auto; max-height:380px; border:1px solid #e2e8f0;"></div>
         </div>
 
-        <div class="search-panels">
-            <!-- Doctor Search -->
-            <div class="search-panel">
-                <h3>Find a Doctor</h3>
-                <form action="{{ route('doctors.index') }}" method="GET" style="display:flex; flex-direction:column; gap:0.6rem">
-                    <input type="text" name="q" class="form-control" placeholder="Search by doctor name..." style="margin-bottom:0">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem">
-                        <select name="specialty_id" class="form-control">
-                            <option value="">All Specialties</option>
-                            @foreach($specialties as $spec)
-                                <option value="{{ $spec->id }}">{{ $spec->name }}</option>
-                            @endforeach
-                        </select>
-                        <select name="location_id" class="form-control">
-                            <option value="">All Locations</option>
-                            @foreach($locations as $loc)
-                                <option value="{{ $loc->id }}">{{ $loc->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-white" style="width: 100%; justify-content:center; margin-top:0.3rem">Find Doctor</button>
-                </form>
-            </div>
-
-            <!-- Medicine Search -->
-            <div class="search-panel">
-                <h3>Find Medicine</h3>
-                <form action="{{ route('medicines.index') }}" method="GET" style="display:flex; flex-direction:column; gap:0.5rem">
-                    <input type="text" name="q" class="form-control" placeholder="Search drug or generic name...">
-                    <div style="display:flex; gap:0.5rem; justify-content:flex-end">
-                        <button type="submit" class="btn btn-white" style="width: 100%;">Search Medicines</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+       
     </div>
 </div>
 
