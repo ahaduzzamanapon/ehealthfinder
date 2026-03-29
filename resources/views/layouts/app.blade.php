@@ -111,7 +111,7 @@
                     <li><a href="{{ route('doctors.index', ['location_id' => '']) }}">Doctors in Chittagong</a></li>
                     <li><a href="{{ route('doctors.index', ['location_id' => '']) }}">Doctors in Rangpur</a></li>
                     <li><a href="{{ route('doctors.index', ['location_id' => '']) }}">Doctors in Sylhet</a></li>
-                    <li><a href="{{ route('sitemap') ?? '/sitemap.xml' }}">🗺️ Sitemap</a></li>
+                    <li><a href="/sitemap.xml">🗺️ Sitemap</a></li>
                 </ul>
             </div>
         </div>
