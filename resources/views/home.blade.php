@@ -140,25 +140,6 @@
 
 
 
-<!-- QUICK STATS -->
-<div class="stats-row">
-    <div class="stat-card blue">
-        <div class="stat-num">{{ number_format($stats['doctors']) }}+</div>
-        <div class="stat-label">Specialist Doctors</div>
-    </div>
-    <div class="stat-card teal">
-        <div class="stat-num">{{ number_format($stats['medicines']) }}+</div>
-        <div class="stat-label">Medicines & Brands</div>
-    </div>
-    <div class="stat-card green">
-        <div class="stat-num">{{ number_format($stats['locations']) }}</div>
-        <div class="stat-label">Divisions & Districts</div>
-    </div>
-    <div class="stat-card purple">
-        <div class="stat-num">{{ number_format($stats['specialties']) }}</div>
-        <div class="stat-label">Medical Specialties</div>
-    </div>
-</div>
 
 <!-- TOP SPECIALTIES -->
 <div class="section-head" style="margin-bottom: 1.5rem;">
