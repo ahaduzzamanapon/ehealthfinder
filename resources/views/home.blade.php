@@ -138,10 +138,56 @@
 })();
 </script>
 
+@php
+    /* Build all specialty × location combos with doctor count > 0 */
+    use App\Models\Doctor;
+    $qlSpecs = $specialties;   /* all specialties */
+    $qlLocs  = $locations;     /* all locations  */
+@endphp
 
+<!-- ═══ POPULAR SEARCHES QUICK LINKS ═══ -->
+<div class="section-head" style="margin-bottom:1.5rem; margin-top:1rem;">
+    <h2>Popular <span>Doctor Searches</span></h2>
+    <p style="color:var(--text-light); font-size:0.95rem; margin-top:0.5rem;">Find the right specialist in your city — click any link below to browse verified doctors.</p>
+</div>
 
+<div id="ql-wrapper" style="margin-bottom:3.5rem;">
+    @php
+        $qlLinks = [];
+        foreach($qlSpecs as $s) {
+            foreach($qlLocs as $l) {
+                $cnt = Doctor::where('specialty_id',$s->id)->where('location_id',$l->id)->count();
+                if($cnt > 0) {
+                    $qlLinks[] = [
+                        'label' => $s->name.' in '.$l->name,
+                        'sub'   => $cnt.' doctors',
+                        'url'   => route('doctors.index', ['specialty_id'=>$s->id,'location_id'=>$l->id]),
+                    ];
+                }
+            }
+        }
+        /* Sort by count desc — already structured above;
+           shuffle and show first 60 to keep page manageable */
+        $qlLinks = collect($qlLinks)->shuffle()->take(60)->values();
+    @endphp
 
-<!-- TOP SPECIALTIES -->
+    @if($qlLinks->isNotEmpty())
+        <div style="display:flex; flex-wrap:wrap; gap:0.6rem;">
+            @foreach($qlLinks as $ql)
+                <a href="{{ $ql['url'] }}" class="ql-pill">
+                    <span class="ql-icon">🔍</span>
+                    <span class="ql-text">{{ $ql['label'] }}</span>
+                    <span class="ql-count">{{ $ql['sub'] }}</span>
+                </a>
+            @endforeach
+            <a href="{{ route('doctors.index') }}" class="ql-pill ql-pill-more">
+                Browse All Doctors &rarr;
+            </a>
+        </div>
+    @endif
+</div>
+
+<!-- STATS CARDS (below quick links) -->
 <div class="section-head" style="margin-bottom: 1.5rem;">
     <h2>Browse by <span>Specialty</span></h2>
 </div>
