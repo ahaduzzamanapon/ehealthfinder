@@ -5,6 +5,8 @@
 @section('meta_keywords', 'specialist doctor Bangladesh, find doctor online, doctor Dhaka, medicine price Bangladesh, book doctor appointment, ehealthfinder, specialist doctor near me')
 @section('og_title', 'eHealthFinder | Find Specialist Doctors & Medicines in Bangladesh')
 @section('og_description', 'Search thousands of verified specialist doctors and medicines across Bangladesh. Find chamber details, visiting hours, and appointment numbers.')
+@section('og_image', asset('logo.png'))
+@section('og_type', 'website')
 
 @section('content')
 <!-- GORGEOUS HERO SECTION -->
