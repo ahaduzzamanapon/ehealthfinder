@@ -938,6 +938,7 @@ a:hover .card {
     border-radius: 24px;
     padding: 2.5rem 3rem;
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 2.5rem;
     margin-bottom: 2.5rem;
@@ -954,7 +955,7 @@ a:hover .card {
     pointer-events: none;
 }
 .med-img-panel {
-    flex-shrink: 0;
+    flex: 0 0 160px;
     width: 160px;
     height: 160px;
     background: rgba(255,255,255,0.15);
@@ -1234,10 +1235,11 @@ a:hover .card {
     display: flex;
     background: white;
     border-radius: 50px;
-    overflow: hidden;
+    overflow: visible;
     box-shadow: 0 8px 40px rgba(0,0,0,0.25);
     position: relative;
     min-width: 0;
+    clip-path: none;
 }
 .smart-search-icon {
     padding: 0 1.2rem;

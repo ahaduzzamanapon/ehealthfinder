@@ -73,41 +73,56 @@
         <div class="footer-grid">
             <div class="footer-col footer-about">
                 <a href="{{ route('home') }}" class="footer-logo">
-                    <img src="{{ asset('logo.png') }}" alt="eHealthFinder" style="height:38px; width:auto; filter:brightness(0) invert(1);">
+                    <img src="{{ asset('logo.png') }}" alt="eHealthFinder" style="height:40px; width:auto; filter:brightness(0) invert(1); display:block;">
                 </a>
-                <p>Leading healthcare portal in Bangladesh. Find expert doctors, discover accurate medicine information, and make informed medical decisions.</p>
+                <p>Bangladesh's leading healthcare portal. Find expert doctors, discover accurate medicine information, and make informed medical decisions — all in one place.</p>
+                <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
+                    <span style="background:rgba(255,255,255,0.08); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:1rem;">🌐</span>
+                    <span style="background:rgba(255,255,255,0.08); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:1rem;">📧</span>
+                </div>
             </div>
-            
+
             <div class="footer-col">
                 <h3>For Patients</h3>
                 <ul class="footer-links">
-                    <li><a href="{{ route('doctors.index') }}">Find a Doctor</a></li>
-                    <li><a href="{{ route('medicines.index') }}">Medicine Index</a></li>
-                    <li><a href="#">Health Blog</a></li>
+                    <li><a href="{{ route('doctors.index') }}">🔍 Find a Doctor</a></li>
+                    <li><a href="{{ route('medicines.index') }}">💊 Medicine Index</a></li>
+                    <li><a href="{{ route('doctors.index', ['specialty_id' => '']) }}">👨‍⚕️ All Specialties</a></li>
+                    <li><a href="{{ route('home') }}#specialties">🏥 Browse by Specialty</a></li>
+                    <li><a href="{{ route('home') }}#cities">📍 Browse by City</a></li>
                 </ul>
             </div>
-            
-            <div class="footer-col">
-                <h3>For Providers</h3>
-                <ul class="footer-links">
-                    <li><a href="#">Join eHealthFinder</a></li>
-                    <li><a href="#">Claim Profile</a></li>
-                    <li><a href="#">Provider Support</a></li>
-                </ul>
-            </div>
-            
+
             <div class="footer-col">
                 <h3>Company</h3>
                 <ul class="footer-links">
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Contact Support</a></li>
-                    <li><a href="#">Terms & Privacy</a></li>
+                    <li><a href="{{ route('about') }}">ℹ️ About Us</a></li>
+                    <li><a href="{{ route('privacy') }}">🔒 Privacy Policy</a></li>
+                    <li><a href="{{ route('disclaimer') }}">⚠️ Disclaimer</a></li>
+                    <li><a href="{{ route('terms') }}">📋 Terms of Use</a></li>
+                    <li><a href="mailto:contact@ehealthfinder.com">✉️ Contact Us</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="{{ route('doctors.index', ['location_id' => '']) }}">Doctors in Dhaka</a></li>
+                    <li><a href="{{ route('doctors.index', ['location_id' => '']) }}">Doctors in Chittagong</a></li>
+                    <li><a href="{{ route('doctors.index', ['location_id' => '']) }}">Doctors in Rangpur</a></li>
+                    <li><a href="{{ route('doctors.index', ['location_id' => '']) }}">Doctors in Sylhet</a></li>
+                    <li><a href="{{ route('sitemap') ?? '/sitemap.xml' }}">🗺️ Sitemap</a></li>
                 </ul>
             </div>
         </div>
-        
+
         <div class="footer-bottom">
-            <p>&copy; {{ date('Y') }} <strong>eHealthFinder</strong> Portal. Built with Laravel. All rights reserved.</p>
+            <p>
+                &copy; {{ date('Y') }} <strong>eHealthFinder</strong> — Bangladesh's Healthcare Portal. All rights reserved.
+                &nbsp;|&nbsp; <a href="{{ route('privacy') }}" style="color:#94a3b8;">Privacy</a>
+                &nbsp;|&nbsp; <a href="{{ route('terms') }}" style="color:#94a3b8;">Terms</a>
+                &nbsp;|&nbsp; <a href="{{ route('disclaimer') }}" style="color:#94a3b8;">Disclaimer</a>
+            </p>
         </div>
     </footer>
 </body>
