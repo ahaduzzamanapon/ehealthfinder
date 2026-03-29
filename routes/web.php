@@ -4,6 +4,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\StaticPageController;
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 Route::get('/robots.txt',  [SitemapController::class, 'robots']);
@@ -14,6 +15,12 @@ Route::get('/medicines', [SearchController::class, 'searchMedicines'])->name('me
 
 Route::get('/doctor/{idslug}', [DoctorController::class, 'show'])->name('doctor.show');
 Route::get('/medicine/{id}/{slug?}', [MedicineController::class, 'show'])->name('medicine.show');
+
+// Static Pages
+Route::get('/about',       [StaticPageController::class, 'about'])->name('about');
+Route::get('/privacy',     [StaticPageController::class, 'privacy'])->name('privacy');
+Route::get('/disclaimer',  [StaticPageController::class, 'disclaimer'])->name('disclaimer');
+Route::get('/terms',       [StaticPageController::class, 'terms'])->name('terms');
 
 // Autocomplete API
 Route::get('/api/suggest/doctors',  [SearchController::class, 'suggestDoctors'])->name('api.suggest.doctors');

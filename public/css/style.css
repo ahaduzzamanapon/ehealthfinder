@@ -1223,8 +1223,63 @@ a:hover .card {
 }
 .feat-med-price { font-size: 1.2rem; font-weight: 800; color: var(--accent2); }
 .feat-med-generic { font-size: 0.82rem; color: var(--primary); font-weight: 600; }
-grid { grid-template-columns: 1fr; }
-    .doctors-grid, .medicines-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
-    .footer-grid { grid-template-columns: 1fr; gap: 2rem; text-align: center; }
-    .footer-links a:hover { transform: translateX(0); }
+
+/* ─── SMART SEARCH RESPONSIVE ─── */
+#smart-search-wrap {
+    position: relative;
+    max-width: 700px;
+    margin: 2rem auto 1.5rem;
+}
+.smart-search-bar {
+    display: flex;
+    background: white;
+    border-radius: 50px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    position: relative;
+    min-width: 0;
+}
+.smart-search-icon {
+    padding: 0 1.2rem;
+    display: flex;
+    align-items: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+.smart-search-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    padding: 1rem 0.5rem;
+    font-family: inherit;
+    color: #1e293b;
+    background: transparent;
+}
+.smart-search-btn {
+    background: linear-gradient(135deg, #4f46e5, #06b6d4);
+    color: white;
+    border: none;
+    border-radius: 0 50px 50px 0;
+    padding: 0 1.5rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+}
+.smart-search-btn:hover { opacity: 0.9; }
+
+@media (max-width: 480px) {
+    .smart-search-icon { padding: 0 0.8rem; font-size: 1.1rem; }
+    .smart-search-input { font-size: 0.9rem; padding: 0.9rem 0.3rem; }
+    .smart-search-btn { padding: 0 1rem; font-size: 0.85rem; }
+    #smart-search-wrap { margin: 1.5rem auto 1rem; }
+    .hero { padding: 3rem 1.2rem 2rem; }
+    .hero h1 { font-size: 1.8rem; }
+    .hero p { font-size: 0.95rem; margin-bottom: 1.5rem; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .med-hero-stats { grid-template-columns: 1fr; }
 }

@@ -16,30 +16,28 @@
         <p>Search thousands of verified specialist doctors and comprehensive medicine information across Bangladesh.</p>
 
         <!-- SMART GLOBAL SEARCH -->
-        <div id="smart-search-wrap" style="position:relative; max-width: 700px; margin: 2rem auto 1.5rem;">
-            <div style="display:flex; background:white; border-radius: 50px; overflow:visible; box-shadow: 0 8px 40px rgba(0,0,0,0.25); position:relative;">
-                <span style="padding: 0 1.2rem; display:flex; align-items:center; font-size:1.3rem;">🔍</span>
-                <input 
+        <div id="smart-search-wrap">
+            <div class="smart-search-bar">
+                <span class="smart-search-icon">🔍</span>
+                <input
                     id="smart-search-input"
-                    type="text" 
+                    class="smart-search-input"
+                    type="text"
                     autocomplete="off"
                     placeholder='Try "Cancer Surgeon" or "Rangpur" ...'
-                    style="flex:1; border:none; outline:none; font-size:1.05rem; padding:1.1rem 0.5rem; font-family:inherit; color:#1e293b; background:transparent;"
                 />
-                <button 
-                    onclick="document.getElementById('smart-search-form').submit()"
-                    style="background: linear-gradient(135deg, #4f46e5, #06b6d4); color:white; border:none; border-radius:0 50px 50px 0; padding:0 2rem; font-weight:700; font-size:1rem; cursor:pointer; white-space:nowrap;">
+                <button
+                    class="smart-search-btn"
+                    onclick="document.getElementById('smart-search-form').submit()">
                     Search
                 </button>
             </div>
-            <!-- Hidden form to redirect on Enter -->
             <form id="smart-search-form" action="{{ route('doctors.index') }}" method="GET" style="display:none">
                 <input type="hidden" id="smart-q" name="q">
                 <input type="hidden" id="smart-spec" name="specialty_id">
                 <input type="hidden" id="smart-loc" name="location_id">
             </form>
-            <!-- Autocomplete Dropdown -->
-            <div id="smart-dropdown" style="display:none; position:absolute; top:calc(100% + 8px); left:0; right:0; background:white; border-radius:16px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); z-index:1000; overflow-y:auto; max-height:380px; border:1px solid #e2e8f0;"></div>
+            <div id="smart-dropdown" style="display:none; position:absolute; top:calc(100% + 8px); left:0; right:0; background:white; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.2); z-index:1000; overflow-y:auto; max-height:380px; border:1px solid #e2e8f0;"></div>
         </div>
 
        
