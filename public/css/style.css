@@ -897,7 +897,17 @@ a:hover .card {
     color: white !important;
     font-weight: 700;
     font-size: 1.05rem;
-    padding: 0.9@media (max-width: 768px) {
+    padding: 0.9rem;
+    border-radius: 12px;
+    text-decoration: none !important;
+    margin-top: 0.5rem;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+}
+.call-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.4); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
     .nav-container { padding: 0.8rem 1rem; position: relative; }
     .mobile-toggle { display: block; }
     .nav-links {
