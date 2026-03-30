@@ -52,6 +52,7 @@ $_homeSchema = json_encode([
 
 body {
     background-color: var(--bg-light);
+    overflow-x: hidden;
 }
 
 @keyframes slideGrid {
