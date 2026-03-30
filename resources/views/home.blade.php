@@ -8,32 +8,35 @@
 @section('og_image', asset('logo.png'))
 @section('og_type', 'website')
 
+@php
+$_homeSchema = json_encode([
+    '@context' => 'https://schema.org',
+    '@graph'   => [
+        [
+            '@type'           => 'WebSite',
+            'name'            => 'eHealthFinder',
+            'url'             => url('/'),
+            'potentialAction' => [
+                '@type'       => 'SearchAction',
+                'target'      => route('doctors.index') . '?q={search_term_string}',
+                'query-input' => 'required name=search_term_string',
+            ],
+        ],
+        [
+            '@type'       => 'MedicalOrganization',
+            'name'        => 'eHealthFinder Bangladesh',
+            'url'         => url('/'),
+            'logo'        => asset('logo.png'),
+            'description' => "Bangladesh's leading healthcare portal for finding specialist doctors and medicine information.",
+        ],
+    ],
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+@endphp
+
 @section('schema')
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "name": "eHealthFinder",
-      "url": "{{ url('/') }}",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "{{ route('doctors.index') }}?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      }
-    },
-    {
-      "@type": "MedicalOrganization",
-      "name": "eHealthFinder Bangladesh",
-      "url": "{{ url('/') }}",
-      "logo": "{{ asset('logo.png') }}",
-      "description": "Bangladesh's leading healthcare portal for finding specialist doctors and medicine information."
-    }
-  ]
-}
-</script>
+<script type="application/ld+json">{!! $_homeSchema !!}</script>
 @endsection
+
 
 @section('content')
 <!-- GORGEOUS HERO SECTION -->
