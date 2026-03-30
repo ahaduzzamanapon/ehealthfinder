@@ -169,7 +169,6 @@
 
 @php
     /* Build all specialty × location combos with doctor count > 0 */
-    use App\Models\Doctor;
     $qlSpecs = $specialties;   /* all specialties */
     $qlLocs  = $locations;     /* all locations  */
 @endphp
