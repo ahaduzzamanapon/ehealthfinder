@@ -5,7 +5,7 @@
     $location   = $doctor->location?->name  ?? 'Bangladesh';
     $safeImg    = str_replace('\\', '/', $doctor->image_path ?? '');
     $imgUrl     = $safeImg ? (Str::startsWith($safeImg, 'http') ? $safeImg : asset($safeImg)) : null;
-    $docUrl     = route('doctor.show', ['idslug' => $doctor->id . '-' . Str::slug($doctor->name)]);
+    $docUrl     = route('doctor.show', ['idslug' => $doctor->seo_slug]);
     $ogImg      = $imgUrl ?? asset('logo.png');
 
     // Build JSON-LD as a PHP string to avoid Blade @if nesting inside @section
@@ -56,7 +56,7 @@
 <div class="breadcrumb">
     <a href="{{ route('home') }}">Home</a> ›
     <a href="{{ route('doctors.index') }}">Doctors</a> ›
-    @if($doctor->specialty)<a href="{{ route('doctors.index', ['specialty_id' => $doctor->specialty_id]) }}">{{ $specialty }}</a> ›@endif
+    @if($doctor->specialty)<a href="{{ \App\Helpers\SeoHelper::getSeoUrl($doctor->specialty_id) }}">{{ $specialty }}</a> ›@endif
     <span>{{ $doctor->name }}</span>
 </div>
 

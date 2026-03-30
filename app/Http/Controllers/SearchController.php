@@ -32,6 +32,15 @@ class SearchController extends Controller
 
     public function searchDoctors(Request $request)
     {
+        // 301 Redirect old parameterized URLs to clean SEO URLs
+        if (!$request->filled('q') && ($request->filled('location_id') || $request->filled('specialty_id')) && !$request->routeIs('seo.url')) {
+            $url = \App\Helpers\SeoHelper::getSeoUrl($request->specialty_id, $request->location_id);
+            // Don't redirect if the helper returned the generic /doctors route to avoid loops
+            if ($url !== route('doctors.index')) {
+                return redirect($url, 301);
+            }
+        }
+
         $query = Doctor::with(['location', 'specialty']);
 
         if ($request->filled('q')) {
@@ -95,7 +104,7 @@ class SearchController extends Controller
                 'id'       => $d->id,
                 'label'    => $d->name,
                 'sub'      => $d->specialty?->name . ($d->location ? ' · ' . $d->location->name : ''),
-                'url'      => route('doctor.show', ['id' => $d->id, 'slug' => \Illuminate\Support\Str::slug($d->name)]),
+                'url'      => route('doctor.show', ['idslug' => $d->seo_slug]),
                 'type'     => 'doctor',
             ]);
 
@@ -142,7 +151,7 @@ class SearchController extends Controller
             ->map(fn($d) => [
                 'label' => $d->name,
                 'sub'   => ($d->specialty?->name ?? 'Doctor') . ($d->location ? ' · ' . $d->location->name : ''),
-                'url'   => route('doctor.show', ['id' => $d->id, 'slug' => \Illuminate\Support\Str::slug($d->name)]),
+                'url'   => route('doctor.show', ['idslug' => $d->seo_slug]),
                 'type'  => 'doctor',
             ]);
 
@@ -189,7 +198,7 @@ class SearchController extends Controller
                         $results[] = [
                             'label'        => $spec->name . ' in ' . $loc->name,
                             'sub'          => $count . ' doctors available',
-                            'url'          => route('doctors.index', ['specialty_id' => $spec->id, 'location_id' => $loc->id]),
+                            'url'          => \App\Helpers\SeoHelper::getSeoUrl($spec->id, $loc->id),
                             'type'         => 'combo',
                             'specialty_id' => $spec->id,
                             'location_id'  => $loc->id,
@@ -207,7 +216,7 @@ class SearchController extends Controller
                         $results[] = [
                             'label'        => $spec->name . ' in ' . $loc->name,
                             'sub'          => $count . ' doctors available',
-                            'url'          => route('doctors.index', ['specialty_id' => $spec->id, 'location_id' => $loc->id]),
+                            'url'          => \App\Helpers\SeoHelper::getSeoUrl($spec->id, $loc->id),
                             'type'         => 'combo',
                             'specialty_id' => $spec->id,
                             'location_id'  => $loc->id,
@@ -228,7 +237,7 @@ class SearchController extends Controller
                     $results[] = [
                         'label'        => $spec->name . ' in ' . $matchedLoc->name,
                         'sub'          => $count . ' doctors available',
-                        'url'          => route('doctors.index', ['specialty_id' => $spec->id, 'location_id' => $matchedLoc->id]),
+                        'url'          => \App\Helpers\SeoHelper::getSeoUrl($spec->id, $matchedLoc->id),
                         'type'         => 'combo',
                         'specialty_id' => $spec->id,
                         'location_id'  => $matchedLoc->id,
@@ -244,7 +253,7 @@ class SearchController extends Controller
             ->map(fn($d) => [
                 'label' => $d->name,
                 'sub'   => ($d->specialty?->name ?? '') . ($d->location ? ' · ' . $d->location->name : ''),
-                'url'   => route('doctor.show', ['id' => $d->id, 'slug' => \Illuminate\Support\Str::slug($d->name)]),
+                'url'   => route('doctor.show', ['idslug' => $d->seo_slug]),
                 'type'  => 'doctor',
             ])->toArray();
 
@@ -271,10 +280,7 @@ class SearchController extends Controller
                         $rows[] = [
                             'label' => $spec->name . ' in ' . $loc->name,
                             'count' => $cnt . ' doctors',
-                            'url'   => route('doctors.index', [
-                                'specialty_id' => $spec->id,
-                                'location_id'  => $loc->id,
-                            ]),
+                            'url'   => \App\Helpers\SeoHelper::getSeoUrl($spec->id, $loc->id),
                         ];
                     }
                 }
@@ -285,5 +291,51 @@ class SearchController extends Controller
         });
 
         return response()->json($links);
+    }
+
+    /**
+     * Map clean SEO path to specialty and location IDs without DB hits (via Cache),
+     * and route the user to standard searchDoctors view logic.
+     */
+    public function handleSeoUrl(Request $request, $seo_path)
+    {
+        $specialtySlug = null;
+        $locationSlug = null;
+
+        if (preg_match('/^best-doctors-in-(.+)$/', $seo_path, $matches)) {
+            $locationSlug = $matches[1];
+        } elseif (preg_match('/^best-(.+)-doctors-in-bangladesh$/', $seo_path, $matches)) {
+            $specialtySlug = $matches[1];
+        } elseif (preg_match('/^best-(.+)-doctors-in-(.+)$/', $seo_path, $matches)) {
+            $specialtySlug = $matches[1];
+            $locationSlug = $matches[2];
+        } else {
+            abort(404);
+        }
+
+        $specialtyId = null;
+        $locationId = null;
+
+        if ($specialtySlug) {
+            $specialties = Cache::rememberForever('map_specialties', fn() => Specialty::all());
+            $specialty = $specialties->first(fn($s) => \Illuminate\Support\Str::slug($s->name) === $specialtySlug);
+            if (!$specialty) abort(404);
+            $specialtyId = $specialty->id;
+        }
+
+        if ($locationSlug) {
+            $locations = Cache::rememberForever('map_locations', fn() => Location::all());
+            $location = $locations->first(fn($l) => \Illuminate\Support\Str::slug($l->name) === $locationSlug);
+            if (!$location) abort(404);
+            $locationId = $location->id;
+        }
+
+        // Merge IDs into the request so searchDoctors() treats it like a normal query
+        $request->merge([
+            'specialty_id' => $specialtyId,
+            'location_id'  => $locationId,
+        ]);
+
+        return $this->searchDoctors($request);
     }
 }

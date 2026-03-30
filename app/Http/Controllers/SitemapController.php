@@ -75,11 +75,11 @@ class SitemapController extends Controller
                 ];
             } 
             elseif ($type === 'doctors') {
-                $docs = Doctor::select('id', 'name', 'updated_at')
+                $docs = Doctor::with(['specialty', 'location'])->select('id', 'name', 'specialty_id', 'location_id', 'updated_at')
                     ->offset($offset)->limit($this->chunkSize)->get();
                 foreach ($docs as $doc) {
                     $items[] = [
-                        'loc' => route('doctor.show', ['idslug' => $doc->id . '-' . Str::slug($doc->name)]),
+                        'loc' => route('doctor.show', ['idslug' => $doc->seo_slug]),
                         'lastmod' => $doc->updated_at ? $doc->updated_at->toAtomString() : $now,
                         'changefreq' => 'weekly',
                         'priority' => '0.8'
@@ -103,7 +103,7 @@ class SitemapController extends Controller
                 $locations = DB::table('doctors')->select('location_id')->distinct()->whereNotNull('location_id')->get();
                 foreach($locations as $l) {
                     $items[] = [
-                        'loc' => route('doctors.index', ['location_id' => $l->location_id]),
+                        'loc' => \App\Helpers\SeoHelper::getSeoUrl(null, $l->location_id),
                         'changefreq' => 'weekly',
                         'priority' => '0.8'
                     ];
@@ -114,7 +114,7 @@ class SitemapController extends Controller
                 $specialties = DB::table('doctors')->select('specialty_id')->distinct()->whereNotNull('specialty_id')->get();
                 foreach($specialties as $s) {
                     $items[] = [
-                        'loc' => route('doctors.index', ['specialty_id' => $s->specialty_id]),
+                        'loc' => \App\Helpers\SeoHelper::getSeoUrl($s->specialty_id, null),
                         'changefreq' => 'weekly',
                         'priority' => '0.8'
                     ];
@@ -129,7 +129,7 @@ class SitemapController extends Controller
                 
                 foreach($combos as $c) {
                     $items[] = [
-                        'loc' => route('doctors.index', ['specialty_id' => $c->specialty_id, 'location_id' => $c->location_id]),
+                        'loc' => \App\Helpers\SeoHelper::getSeoUrl($c->specialty_id, $c->location_id),
                         'changefreq' => 'weekly',
                         'priority' => '0.9'
                     ];

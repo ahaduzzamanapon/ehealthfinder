@@ -76,11 +76,7 @@
     }
 
     // ── Canonical URL ───────────────────────────────────────
-    $canonicalParams = array_filter([
-        'specialty_id' => request('specialty_id'),
-        'location_id'  => request('location_id'),
-    ]);
-    $seoCanonical = route('doctors.index', $canonicalParams);
+    $seoCanonical = \App\Helpers\SeoHelper::getSeoUrl(request('specialty_id'), request('location_id'));
 @endphp
 
 @section('title',            $seoTitle)
@@ -141,7 +137,7 @@
 <div class="doctors-grid" style="margin-bottom:2.5rem;">
     @forelse($doctors as $doc)
         @php $safeImg = str_replace('\\', '/', $doc->image_path); @endphp
-        <a href="{{ route('doctor.show', ['idslug' => $doc->id . '-' . Str::slug($doc->name)]) }}"
+        <a href="{{ route('doctor.show', ['idslug' => $doc->seo_slug]) }}"
            style="color:inherit; text-decoration:none;"
            title="{{ $doc->name }} – {{ $doc->specialty?->name ?? '' }} in {{ $doc->location?->name ?? 'Bangladesh' }}">
             <div class="doctor-card">

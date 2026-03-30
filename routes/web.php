@@ -29,3 +29,8 @@ Route::get('/api/suggest/medicines',[SearchController::class, 'suggestMedicines'
 Route::get('/api/suggest/all',      [SearchController::class, 'suggestAll'])->name('api.suggest.all');
 Route::get('/api/suggest/combined', [SearchController::class, 'suggestCombined'])->name('api.suggest.combined');
 Route::get('/api/quick-links',      [SearchController::class, 'quickLinks'])->name('api.quick-links');
+
+// 10. Dynamic SEO Slug Catch-All (Put this at the VERY END to avoid conflicts)
+Route::get('/{seo_path}', [SearchController::class, 'handleSeoUrl'])
+    ->where('seo_path', '^(best-.*|doctors-in-.*)$')
+    ->name('seo.url');

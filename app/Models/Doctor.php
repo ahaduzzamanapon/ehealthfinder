@@ -12,4 +12,18 @@ class Doctor extends Model {
     public function getSlugAttribute() {
         return Str::slug($this->name);
     }
+    
+    public function getSeoSlugAttribute() {
+        $parts = [];
+        if ($this->relationLoaded('specialty') && $this->specialty) {
+            $parts[] = Str::slug($this->specialty->name);
+        }
+        if ($this->relationLoaded('location') && $this->location) {
+            $parts[] = 'in';
+            $parts[] = Str::slug($this->location->name);
+        }
+        $parts[] = Str::slug($this->name);
+        $parts[] = $this->id;
+        return implode('-', $parts);
+    }
 }

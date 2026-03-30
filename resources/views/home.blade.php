@@ -197,7 +197,7 @@
 </div>
 <div style="display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 4rem;">
     @foreach($specialties as $spec)
-        <a href="{{ route('doctors.index', ['specialty_id' => $spec->id]) }}" 
+        <a href="{{ \App\Helpers\SeoHelper::getSeoUrl($spec->id, null) }}" 
            style="background: white; border: 1px solid var(--gray); padding: 0.6rem 1.2rem; border-radius: 50px; font-weight: 600; color: var(--dark); font-size: 0.95rem; box-shadow: var(--shadow-sm); transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.3rem;">
            🩺 {{ $spec->name }}
         </a>
@@ -213,7 +213,7 @@
 </div>
 <div style="display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 4rem;">
     @foreach($locations as $loc)
-        <a href="{{ route('doctors.index', ['location_id' => $loc->id]) }}" 
+        <a href="{{ \App\Helpers\SeoHelper::getSeoUrl(null, $loc->id) }}" 
            style="background: white; border: 1px solid var(--gray); padding: 0.6rem 1.2rem; border-radius: 50px; font-weight: 600; color: var(--dark); font-size: 0.95rem; box-shadow: var(--shadow-sm); transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.3rem;">
            📍 {{ $loc->name }}
         </a>
@@ -227,7 +227,7 @@
 </div>
 <div class="grid-3" style="margin-bottom: 4rem;">
     @foreach($featuredDoctors as $doc)
-        <a href="{{ route('doctor.show', ['idslug' => $doc->id . '-' . Str::slug($doc->name)]) }}" style="color:inherit">
+        <a href="{{ route('doctor.show', ['idslug' => $doc->seo_slug]) }}" style="color:inherit">
             <div class="card clearfix">
                 @php $safeImg = str_replace('\\', '/', $doc->image_path); @endphp
                 <img src="{{ Str::startsWith($safeImg, 'http') ? $safeImg : ($safeImg ? asset($safeImg) : 'https://ui-avatars.com/api/?name='.urlencode($doc->name).'&background=random') }}" class="doc-img" alt="{{ $doc->name }}">
@@ -273,7 +273,7 @@
     @endphp
     @foreach($topSpecs as $s)
         @foreach($topLocs as $l)
-            <a href="{{ route('doctors.index', ['specialty_id' => $s->id, 'location_id' => $l->id]) }}" 
+            <a href="{{ \App\Helpers\SeoHelper::getSeoUrl($s->id, $l->id) }}" 
                style="background: white; border: 1px solid var(--gray); padding: 0.8rem 1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 600; color: var(--text); transition: all 0.2s; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 0.5rem;">
                <span style="color: var(--primary);">📍</span> {{ $s->name }} in {{ $l->name }}
             </a>

@@ -8,19 +8,21 @@ class DoctorController extends Controller
 {
     public function show($idslug)
     {
-        // Parse "123-dr-some-name" → id=123, slug=dr-some-name
-        if (preg_match('/^(\d+)-(.+)$/', $idslug, $m)) {
-            $id   = $m[1];
-            $slug = $m[2];
+        // Parse "dental-surgeon-in-bogra-dr-name-123" (new) OR "123-dr-name" (legacy)
+        if (preg_match('/-(\d+)$/', $idslug, $m)) {
+            $id = $m[1];
+        } elseif (preg_match('/^(\d+)-/', $idslug, $m)) {
+            $id = $m[1];
+        } elseif (is_numeric($idslug)) {
+            $id = $idslug;
         } else {
-            $id   = $idslug;
-            $slug = null;
+            abort(404);
         }
 
         $doctor = Doctor::with(['location', 'specialty', 'chambers.hospital', 'chambers.hospital.location'])->findOrFail($id);
 
-        // Canonical redirect if slug is missing or wrong
-        $canonical = $doctor->id . '-' . Str::slug($doctor->name);
+        // Canonical redirect with new SEO URL structure
+        $canonical = $doctor->seo_slug;
         if ($idslug !== $canonical) {
             return redirect()->route('doctor.show', ['idslug' => $canonical], 301);
         }
