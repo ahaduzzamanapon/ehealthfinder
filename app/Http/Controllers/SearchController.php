@@ -247,9 +247,8 @@ class SearchController extends Controller
                                 'url'          => \App\Helpers\SeoHelper::getSeoUrl($spec->id, $loc->id),
                                 'type'         => 'combo'
                             ];
-                            $added++;
                         }
-                        if ($added >= 25) break; 
+                        if (count($results) >= 150) break 2;
                     }
                 }
             }
@@ -265,7 +264,6 @@ class SearchController extends Controller
                     
                  if ($docCountsLoc->isNotEmpty()) {
                      $specialtiesInLoc = Specialty::whereIn('id', $docCountsLoc->pluck('specialty_id'))->orderBy('name')->get()->keyBy('id');
-                     $added = 0;
                      foreach ($docCountsLoc as $row) {
                          $spec = $specialtiesInLoc->get($row->specialty_id);
                          if ($spec) {
@@ -275,9 +273,8 @@ class SearchController extends Controller
                                  'url'          => \App\Helpers\SeoHelper::getSeoUrl($spec->id, $matchedLoc->id),
                                  'type'         => 'combo'
                              ];
-                             $added++;
                          }
-                         if ($added >= 20) break;
+                         if (count($results) >= 150) break;
                      }
                  }
             }
