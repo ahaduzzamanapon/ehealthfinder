@@ -70,7 +70,7 @@ body {
     width: 100vw;
     margin-left: calc(-50vw + 50%);
     margin-right: calc(-50vw + 50%);
-    margin-top: -2rem; /* Negate main container top margin */
+    margin-top: -2rem; /* Negate main container top margin (Mobile Default) */
     background: #ffffff;
     background-image: 
         radial-gradient(circle at top center, rgba(67, 56, 202, 0.08) 0%, transparent 70%),
@@ -83,6 +83,13 @@ body {
     border-bottom: 1px solid #f1f5f9;
     animation: slideGrid 20s linear infinite;
     overflow: hidden;
+}
+
+/* Desktop override based on user request */
+@media(min-width: 768px) {
+    .mx-hero {
+        margin-top: -8rem;
+    }
 }
 .mx-hero::before {
     content: '';
