@@ -6,7 +6,8 @@ use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StaticPageController;
 
-Route::get('/sitemap.xml', [SitemapController::class, 'index']);
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/sitemap/{type}/{page}.xml', [SitemapController::class, 'show'])->name('sitemap.show');
 Route::get('/robots.txt',  [SitemapController::class, 'robots']);
 
 Route::get('/', [SearchController::class, 'home'])->name('home');
