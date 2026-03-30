@@ -291,7 +291,7 @@ class SearchController extends Controller
                 'type'  => 'doctor',
             ])->toArray();
 
-        return response()->json(array_slice(array_merge($results, $doctors), 0, 10));
+        return response()->json(array_slice(array_merge($results, $doctors), 0, 150));
     }
 
     /**
