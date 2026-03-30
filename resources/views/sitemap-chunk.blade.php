@@ -1,16 +1,16 @@
 <?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-@foreach($urls as $url)
+@foreach($urls as $item)
     <url>
-        <loc>{{ $url['loc'] }}</loc>
-        @if(isset($url['lastmod']))
-            <lastmod>{{ $url['lastmod'] }}</lastmod>
+        <loc>{{ $item['loc'] }}</loc>
+        @if(!empty($item['lastmod']))
+            <lastmod>{{ $item['lastmod'] }}</lastmod>
         @endif
-        @if(isset($url['changefreq']))
-            <changefreq>{{ $url['changefreq'] }}</changefreq>
+        @if(!empty($item['changefreq']))
+            <changefreq>{{ $item['changefreq'] }}</changefreq>
         @endif
-        @if(isset($url['priority']))
-            <priority>{{ $url['priority'] }}</priority>
+        @if(!empty($item['priority']))
+            <priority>{{ $item['priority'] }}</priority>
         @endif
     </url>
 @endforeach

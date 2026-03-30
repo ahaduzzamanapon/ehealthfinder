@@ -44,7 +44,7 @@ class SitemapController extends Controller
 
         // 6. Combinations (Specialty in City)
         $combosCount = DB::table('doctors')->select('location_id', 'specialty_id')->distinct()
-            ->whereNotNull('location_id')->whereNotNull('specialty_id')->count();
+            ->whereNotNull('location_id')->whereNotNull('specialty_id')->get()->count();
         $comboPages = ceil($combosCount / $this->chunkSize);
         for ($i = 1; $i <= $comboPages; $i++) {
             $sitemaps[] = route('sitemap.show', ['type' => 'combinations', 'page' => $i]);
