@@ -18,25 +18,27 @@ class SeoHelper
             return route('doctors.index');
         }
 
-        $specialty = null;
-        $location = null;
+        $specialty_name = null;
+        $location_name  = null;
 
         if ($specialty_id) {
-            $specialties = Cache::rememberForever('map_specialties', fn() => Specialty::all());
-            $specialty = $specialties->firstWhere('id', $specialty_id);
+            $specialty_name = Cache::rememberForever("specialty_name_{$specialty_id}", function () use ($specialty_id) {
+                return Specialty::find($specialty_id)?->name;
+            });
         }
 
         if ($location_id) {
-            $locations = Cache::rememberForever('map_locations', fn() => Location::all());
-            $location = $locations->firstWhere('id', $location_id);
+            $location_name = Cache::rememberForever("location_name_{$location_id}", function () use ($location_id) {
+                return Location::find($location_id)?->name;
+            });
         }
 
-        if ($specialty && $location) {
-            return url('/best-' . Str::slug($specialty->name) . '-doctors-in-' . Str::slug($location->name));
-        } elseif ($specialty) {
-            return url('/best-' . Str::slug($specialty->name) . '-doctors-in-bangladesh');
-        } elseif ($location) {
-            return url('/best-doctors-in-' . Str::slug($location->name));
+        if ($specialty_name && $location_name) {
+            return url('/best-' . Str::slug($specialty_name) . '-doctors-in-' . Str::slug($location_name));
+        } elseif ($specialty_name) {
+            return url('/best-' . Str::slug($specialty_name) . '-doctors-in-bangladesh');
+        } elseif ($location_name) {
+            return url('/best-doctors-in-' . Str::slug($location_name));
         }
 
         return route('doctors.index');

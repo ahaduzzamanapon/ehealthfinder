@@ -317,17 +317,17 @@ class SearchController extends Controller
         $locationId = null;
 
         if ($specialtySlug) {
-            $specialties = Cache::rememberForever('map_specialties', fn() => Specialty::all());
-            $specialty = $specialties->first(fn($s) => \Illuminate\Support\Str::slug($s->name) === $specialtySlug);
-            if (!$specialty) abort(404);
-            $specialtyId = $specialty->id;
+            $specialtyId = Cache::rememberForever("map_specialty_slug_{$specialtySlug}", function () use ($specialtySlug) {
+                return Specialty::all()->first(fn($s) => \Illuminate\Support\Str::slug($s->name) === $specialtySlug)?->id;
+            });
+            if (!$specialtyId) abort(404);
         }
 
         if ($locationSlug) {
-            $locations = Cache::rememberForever('map_locations', fn() => Location::all());
-            $location = $locations->first(fn($l) => \Illuminate\Support\Str::slug($l->name) === $locationSlug);
-            if (!$location) abort(404);
-            $locationId = $location->id;
+            $locationId = Cache::rememberForever("map_location_slug_{$locationSlug}", function () use ($locationSlug) {
+                return Location::all()->first(fn($l) => \Illuminate\Support\Str::slug($l->name) === $locationSlug)?->id;
+            });
+            if (!$locationId) abort(404);
         }
 
         // Merge IDs into the request so searchDoctors() treats it like a normal query
