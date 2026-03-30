@@ -105,7 +105,9 @@
                     <div style="font-weight:700; color:#1e293b; font-size:0.95rem;">${highlight(item.label, q)}</div>
                     <div style="font-size:0.8rem; color:#94a3b8;">${item.sub||''}</div>
                 </div>
-                <span style="font-size:0.75rem; background:${item.type==='combo'?'#eff6ff':'#f0fdf4'}; color:${item.type==='combo'?'#1d4ed8':'#166534'}; padding:2px 8px; border-radius:20px; font-weight:600;">${item.type==='combo'?'Location':'Doctor'}</span>
+                <span style="font-size:0.75rem; background:${item.type==='combo'?'#eff6ff':(item.type==='doctor'?'#f0fdf4':'#fefce8')}; color:${item.type==='combo'?'#1d4ed8':(item.type==='doctor'?'#166534':'#854d0e')}; padding:2px 10px; border-radius:12px; font-weight:700;">
+                    ${item.type==='combo' ? 'Area & Specialty' : (item.type==='doctor' ? 'Profile' : 'Medicine')}
+                </span>
             </div>
         `).join('');
         dropdown.style.display = 'block';

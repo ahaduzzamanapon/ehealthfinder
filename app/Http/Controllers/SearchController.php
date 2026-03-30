@@ -173,76 +173,113 @@ class SearchController extends Controller
      */
     public function suggestCombined(Request $request)
     {
-        $q = trim($request->get('q', ''));
+        $q = trim(strtolower($request->get('q', '')));
         if (strlen($q) < 2) return response()->json([]);
 
-        // Check if query contains " in " pattern — e.g. "heart in dhaka"
+        // Handle common medical spelling errors
+        $synonyms = [
+            'gue' => 'gyn', 'gynae' => 'gyne', 'geneco' => 'gyneco', 'gneco' => 'gyneco',
+            'ortho' => 'orthop', 'derma' => 'dermat', 'pedia' => 'pediat', 'medcine' => 'medicine'
+        ];
+        foreach ($synonyms as $bad => $good) {
+            if (str_contains($q, $bad)) $q = str_replace($bad, $good, $q);
+        }
+
+        // Check if query contains " in " pattern
         $specQ = $q;
         $locQ  = null;
-        if (stripos($q, ' in ') !== false) {
-            [$specQ, $locQ] = array_map('trim', explode(' in ', strtolower($q), 2));
+        if (str_contains($q, ' in ')) {
+            [$specQ, $locQ] = array_map('trim', explode(' in ', $q, 2));
         }
 
         $results = [];
 
-        // 1. Specialty-matched results (cross all locations)
+        // 1. Specialty-matched results
         $matchedSpecs = Specialty::where('name', 'like', "%$specQ%")->take(4)->get();
 
         if ($locQ) {
-            // User typed "X in Y" — match specialty x location combos
+            // User typed "X in Y"
             $matchedLocs = Location::where('name', 'like', "%$locQ%")->take(6)->get();
-            foreach ($matchedSpecs as $spec) {
-                foreach ($matchedLocs as $loc) {
-                    $count = Doctor::where('specialty_id', $spec->id)->where('location_id', $loc->id)->count();
-                    if ($count > 0) {
-                        $results[] = [
-                            'label'        => $spec->name . ' in ' . $loc->name,
-                            'sub'          => $count . ' doctors available',
-                            'url'          => \App\Helpers\SeoHelper::getSeoUrl($spec->id, $loc->id),
-                            'type'         => 'combo',
-                            'specialty_id' => $spec->id,
-                            'location_id'  => $loc->id,
-                        ];
+            if ($matchedSpecs->isNotEmpty() && $matchedLocs->isNotEmpty()) {
+                $docCounts = \Illuminate\Support\Facades\DB::table('doctors')
+                    ->select('specialty_id', 'location_id', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+                    ->whereIn('specialty_id', $matchedSpecs->pluck('id'))
+                    ->whereIn('location_id', $matchedLocs->pluck('id'))
+                    ->groupBy('specialty_id', 'location_id')
+                    ->get()
+                    ->keyBy(fn($i) => $i->specialty_id . '_' . $i->location_id);
+
+                foreach ($matchedSpecs as $spec) {
+                    foreach ($matchedLocs as $loc) {
+                        $count = $docCounts->get($spec->id . '_' . $loc->id)?->total ?? 0;
+                        if ($count > 0) {
+                            $results[] = [
+                                'label'        => $spec->name . ' in ' . $loc->name,
+                                'sub'          => $count . ' doctors available',
+                                'url'          => \App\Helpers\SeoHelper::getSeoUrl($spec->id, $loc->id),
+                                'type'         => 'combo'
+                            ];
+                        }
                     }
                 }
             }
         } else {
-            // No " in " — match specialty against all locations
-            $allLocs = Location::orderBy('name')->take(8)->get();
-            foreach ($matchedSpecs as $spec) {
-                foreach ($allLocs as $loc) {
-                    $count = Doctor::where('specialty_id', $spec->id)->where('location_id', $loc->id)->count();
-                    if ($count > 0) {
-                        $results[] = [
-                            'label'        => $spec->name . ' in ' . $loc->name,
-                            'sub'          => $count . ' doctors available',
-                            'url'          => \App\Helpers\SeoHelper::getSeoUrl($spec->id, $loc->id),
-                            'type'         => 'combo',
-                            'specialty_id' => $spec->id,
-                            'location_id'  => $loc->id,
-                        ];
+            // No " in " typed. Match Specialty against ALL distinct locations globally mapped.
+            if ($matchedSpecs->isNotEmpty()) {
+                $docCounts = \Illuminate\Support\Facades\DB::table('doctors')
+                    ->select('specialty_id', 'location_id', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+                    ->whereIn('specialty_id', $matchedSpecs->pluck('id'))
+                    ->groupBy('specialty_id', 'location_id')
+                    ->get();
+                
+                $validLocIds = $docCounts->pluck('location_id')->unique()->toArray();
+                $allLocs = Location::whereIn('id', $validLocIds)->orderBy('name')->get()->keyBy('id');
+                $lookup = $docCounts->keyBy(fn($i) => $i->specialty_id . '_' . $i->location_id);
+
+                foreach ($matchedSpecs as $spec) {
+                    $added = 0;
+                    foreach ($allLocs as $loc) {
+                        $count = $lookup->get($spec->id . '_' . $loc->id)?->total ?? 0;
+                        if ($count > 0) {
+                            $results[] = [
+                                'label'        => $spec->name . ' in ' . $loc->name,
+                                'sub'          => $count . ' doctors available',
+                                'url'          => \App\Helpers\SeoHelper::getSeoUrl($spec->id, $loc->id),
+                                'type'         => 'combo'
+                            ];
+                            $added++;
+                        }
+                        if ($added >= 25) break; 
                     }
                 }
-                // Limit to 6 combo results per specialty
-                if (count($results) >= 8) break;
             }
 
-            // Also: if query matches a location name, show all specialties for that location
+            // Also: if query matches a Location name, show ALL combinations for that Location
             $matchedLoc = Location::where('name', 'like', "%$q%")->first();
             if ($matchedLoc && empty($matchedSpecs->count())) {
-                $specsInLoc = Specialty::whereHas('doctors', fn($dq) => $dq->where('location_id', $matchedLoc->id))
-                    ->orderBy('name')->take(8)->get();
-                foreach ($specsInLoc as $spec) {
-                    $count = Doctor::where('specialty_id', $spec->id)->where('location_id', $matchedLoc->id)->count();
-                    $results[] = [
-                        'label'        => $spec->name . ' in ' . $matchedLoc->name,
-                        'sub'          => $count . ' doctors available',
-                        'url'          => \App\Helpers\SeoHelper::getSeoUrl($spec->id, $matchedLoc->id),
-                        'type'         => 'combo',
-                        'specialty_id' => $spec->id,
-                        'location_id'  => $matchedLoc->id,
-                    ];
-                }
+                 $docCountsLoc = \Illuminate\Support\Facades\DB::table('doctors')
+                    ->select('specialty_id', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+                    ->where('location_id', $matchedLoc->id)
+                    ->groupBy('specialty_id')
+                    ->get();
+                    
+                 if ($docCountsLoc->isNotEmpty()) {
+                     $specialtiesInLoc = Specialty::whereIn('id', $docCountsLoc->pluck('specialty_id'))->orderBy('name')->get()->keyBy('id');
+                     $added = 0;
+                     foreach ($docCountsLoc as $row) {
+                         $spec = $specialtiesInLoc->get($row->specialty_id);
+                         if ($spec) {
+                             $results[] = [
+                                 'label'        => $spec->name . ' in ' . $matchedLoc->name,
+                                 'sub'          => $row->total . ' doctors available',
+                                 'url'          => \App\Helpers\SeoHelper::getSeoUrl($spec->id, $matchedLoc->id),
+                                 'type'         => 'combo'
+                             ];
+                             $added++;
+                         }
+                         if ($added >= 20) break;
+                     }
+                 }
             }
         }
 
