@@ -4,6 +4,31 @@
 @section('meta_description', 'Search the comprehensive medicine index of Bangladesh. Find drug prices, generic names, companies, and antibiotic status.')
 
 @section('content')
+
+@php
+    $schemaList = [];
+    foreach($brands->items() as $key => $brand) {
+        $schemaList[] = [
+            '@type'    => 'ListItem',
+            'position' => $key + 1,
+            'url'      => route('medicine.show', ['id' => $brand->id, 'slug' => Str::slug($brand->name)]),
+            'name'     => $brand->name
+        ];
+    }
+    $schemaJson = json_encode([
+        '@context'        => 'https://schema.org',
+        '@type'           => 'ItemList',
+        'name'            => 'Medicine Directory Bangladesh',
+        'description'     => 'Search the comprehensive medicine index of Bangladesh.',
+        'url'             => route('medicines.index'),
+        'numberOfItems'   => count($schemaList),
+        'itemListElement' => $schemaList
+    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+@endphp
+
+@section('schema')
+<script type="application/ld+json">{!! $schemaJson !!}</script>
+@endsection
 <h1 style="margin-bottom: 2rem">Medicine Database</h1>
 
 <form method="GET" class="card" style="display:flex; gap:1rem; margin-bottom: 3rem; max-width:800px; margin-left:auto; margin-right:auto">

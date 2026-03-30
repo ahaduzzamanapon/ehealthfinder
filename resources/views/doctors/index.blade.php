@@ -77,7 +77,32 @@
 
     // ── Canonical URL ───────────────────────────────────────
     $seoCanonical = \App\Helpers\SeoHelper::getSeoUrl(request('specialty_id'), request('location_id'));
+
+    // ── Generate JSON-LD ItemList Schema ────────────────────
+    $schemaList = [];
+    foreach($doctors->items() as $key => $doc) {
+        $schemaList[] = [
+            '@type'    => 'ListItem',
+            'position' => $key + 1,
+            'url'      => route('doctor.show', ['idslug' => $doc->seo_slug]),
+            'name'     => $doc->name
+        ];
+    }
+    
+    $schemaJson = json_encode([
+        '@context'        => 'https://schema.org',
+        '@type'           => 'ItemList',
+        'name'            => $seoTitle,
+        'description'     => $seoDesc,
+        'url'             => $seoCanonical,
+        'numberOfItems'   => count($schemaList),
+        'itemListElement' => $schemaList
+    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 @endphp
+
+@section('schema')
+<script type="application/ld+json">{!! $schemaJson !!}</script>
+@endsection
 
 @section('title',            $seoTitle)
 @section('meta_description', $seoDesc)

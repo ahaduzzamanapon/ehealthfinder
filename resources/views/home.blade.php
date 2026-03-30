@@ -8,6 +8,33 @@
 @section('og_image', asset('logo.png'))
 @section('og_type', 'website')
 
+@section('schema')
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "name": "eHealthFinder",
+      "url": "{{ url('/') }}",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "{{ route('doctors.index') }}?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "MedicalOrganization",
+      "name": "eHealthFinder Bangladesh",
+      "url": "{{ url('/') }}",
+      "logo": "{{ asset('logo.png') }}",
+      "description": "Bangladesh's leading healthcare portal for finding specialist doctors and medicine information."
+    }
+  ]
+}
+</script>
+@endsection
+
 @section('content')
 <!-- GORGEOUS HERO SECTION -->
 <div class="hero">
