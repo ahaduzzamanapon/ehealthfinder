@@ -299,6 +299,14 @@ class SearchController extends Controller
      */
     public function handleSeoUrl(Request $request, $seo_path)
     {
+        // If a user submitted a filter form (which attaches ?location_id=... etc) while ALREADY on an SEO URL,
+        // we must instantly map those explicit form values to their true SEO URL and 301 redirect them,
+        // stripping the raw query parameters from the address bar.
+        if (!$request->filled('q') && ($request->filled('location_id') || $request->filled('specialty_id'))) {
+            $url = \App\Helpers\SeoHelper::getSeoUrl($request->specialty_id, $request->location_id);
+            return redirect($url, 301);
+        }
+
         $specialtySlug = null;
         $locationSlug = null;
 
