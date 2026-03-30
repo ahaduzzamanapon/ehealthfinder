@@ -1,41 +1,34 @@
-<?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
-    {{-- Static pages --}}
+{!! '<' . '?xml version="1.0" encoding="UTF-8"?' . '>' !!}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+    
+    <!-- Static Pages -->
     <url>
         <loc>{{ url('/') }}</loc>
+        <lastmod>{{ now()->toAtomString() }}</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>{{ route('doctors.index') }}</loc>
+        <loc>{{ url('/blog') }}</loc>
+        <lastmod>{{ now()->toAtomString() }}</lastmod>
         <changefreq>daily</changefreq>
-        <priority>0.9</priority>
-    </url>
-    <url>
-        <loc>{{ route('medicines.index') }}</loc>
-        <changefreq>daily</changefreq>
-        <priority>0.9</priority>
-    </url>
-
-    {{-- Doctor pages --}}
-    @foreach($doctors as $doc)
-    <url>
-        <loc>{{ route('doctor.show', ['idslug' => $doc->id . '-' . Str::slug($doc->name)]) }}</loc>
-        <lastmod>{{ $doc->updated_at ? $doc->updated_at->toAtomString() : now()->toAtomString() }}</lastmod>
-        <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
-    @endforeach
 
-    {{-- Medicine pages --}}
-    @foreach($medicines as $brand)
-    <url>
-        <loc>{{ route('medicine.show', ['id' => $brand->id, 'slug' => $brand->slug ?? Str::slug($brand->name)]) }}</loc>
-        <lastmod>{{ $brand->updated_at ? $brand->updated_at->toAtomString() : now()->toAtomString() }}</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.7</priority>
-    </url>
+    <!-- Blog Posts -->
+    @foreach ($posts as $post)
+        <url>
+            <loc>{{ url('/' . $post->slug) }}</loc>
+            <lastmod>{{ $post->updated_at->toAtomString() }}</lastmod>
+            <changefreq>weekly</changefreq>
+            <priority>0.9</priority>
+            @if($post->featured_image)
+            <image:image>
+                <image:loc>{{ url(Storage::url($post->featured_image)) }}</image:loc>
+                <image:title>{{ $post->seo_title ?? $post->title }}</image:title>
+            </image:image>
+            @endif
+        </url>
     @endforeach
 
 </urlset>

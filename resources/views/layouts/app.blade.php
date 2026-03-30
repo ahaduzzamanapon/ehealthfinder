@@ -35,6 +35,7 @@
 
     {{-- JSON-LD STRUCTURED DATA (per-page) --}}
     @yield('schema')
+    @yield('custom_meta')
 
     {{-- FAVICON --}}
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
@@ -60,6 +61,9 @@
                 </a>
                 <a href="{{ route('medicines.index') }}" class="{{ request()->routeIs('medicines.*', 'medicine.*') ? 'active' : '' }}">
                     <i>💊</i> Medicine Index
+                </a>
+                <a href="{{ route('blog.index') }}" class="{{ request()->routeIs('blog.index') || request()->routeIs('blog.show') ? 'active' : '' }}">
+                    <i>📰</i> Blog
                 </a>
             </nav>
         </div>
@@ -87,6 +91,7 @@
                 <ul class="footer-links">
                     <li><a href="{{ route('doctors.index') }}">🔍 Find a Doctor</a></li>
                     <li><a href="{{ route('medicines.index') }}">💊 Medicine Index</a></li>
+                    <li><a href="{{ route('blog.index') }}">📰 Blog</a></li>
                     <li><a href="{{ route('doctors.index', ['specialty_id' => '']) }}">👨‍⚕️ All Specialties</a></li>
                     <li><a href="{{ route('home') }}#specialties">🏥 Browse by Specialty</a></li>
                     <li><a href="{{ route('home') }}#cities">📍 Browse by City</a></li>

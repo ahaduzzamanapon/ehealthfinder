@@ -113,6 +113,33 @@
 
 @section('content')
 
+<style>
+.mx-doc-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+}
+.mx-doc-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color:#cbd5e1; }
+.mx-doc-header { display: flex; align-items: center; gap: 1rem; padding: 1.5rem; border-bottom: 1px solid #f1f5f9; }
+.mx-doc-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; background: #e2e8f0; }
+.mx-doc-info-title { font-weight: 800; font-size: 1.15rem; color: #1d4ed8; margin-bottom: 0.2rem; }
+.mx-doc-info-deg { font-size: 0.85rem; color: #64748b; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mx-doc-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; flex-grow: 1; }
+.mx-doc-spec { display: inline-block; background: #eff6ff; color: #1d4ed8; padding: 0.3rem 0.8rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; }
+.doctors-grid {
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+    gap: 1.5rem;
+}
+</style>
+
 {{-- Page Header --}}
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
     <div>
@@ -158,34 +185,29 @@
     @endif
 </form>
 
-{{-- Doctor Grid -- using premium doctor-card class --}}
+{{-- Doctor Grid --}}
 <div class="doctors-grid" style="margin-bottom:2.5rem;">
     @forelse($doctors as $doc)
-        @php $safeImg = str_replace('\\', '/', $doc->image_path); @endphp
-        <a href="{{ route('doctor.show', ['idslug' => $doc->seo_slug]) }}"
-           style="color:inherit; text-decoration:none;"
-           title="{{ $doc->name }} – {{ $doc->specialty?->name ?? '' }} in {{ $doc->location?->name ?? 'Bangladesh' }}">
-            <div class="doctor-card">
-                <div class="doctor-card-image">
-                    <img src="{{ $safeImg && Str::startsWith($safeImg,'http') ? $safeImg : ($safeImg ? asset($safeImg) : 'https://ui-avatars.com/api/?name='.urlencode($doc->name).'&background=4f46e5&color=fff&size=300') }}"
-                         alt="{{ $doc->name }} - {{ $doc->specialty?->name ?? 'Doctor' }} in {{ $doc->location?->name ?? 'Bangladesh' }}"
-                         loading="lazy">
-                    <div class="img-overlay"></div>
+        <a href="{{ route('doctor.show', ['idslug' => $doc->seo_slug]) }}" class="mx-doc-card">
+            <div class="mx-doc-header">
+                @php $safeImg = str_replace('\\', '/', $doc->image_path); @endphp
+                <img src="{{ Str::startsWith($safeImg, 'http') ? $safeImg : ($safeImg ? asset($safeImg) : 'https://ui-avatars.com/api/?name='.urlencode($doc->name).'&background=1d4ed8&color=fff') }}" class="mx-doc-img" alt="{{ $doc->name }}">
+                <div>
+                    <div class="mx-doc-info-title">{{ $doc->name }}</div>
+                    <div class="mx-doc-info-deg">{{ $doc->degrees }}</div>
                 </div>
-                <div class="doctor-card-body">
-                    <h3 class="doctor-card-name">{{ $doc->name }}</h3>
-                    <p class="doctor-card-deg">{{ Str::limit($doc->degrees, 70) }}</p>
-                    <div class="tags" style="margin-top:0.75rem; justify-content:flex-start;">
-                        @if($doc->specialty)<span class="tag specialty">{{ $doc->specialty->name }}</span>@endif
-                        @if($doc->location)<span class="tag location">📍 {{ $doc->location->name }}</span>@endif
-                    </div>
-                    @if($doc->designation)
-                    <p style="font-size:0.8rem; color:var(--text-light); margin-top:0.75rem; line-height:1.4;">
-                        {{ Str::limit($doc->designation, 65) }}
-                    </p>
-                    @endif
-                    <div style="margin-top:1rem; padding-top:0.75rem; border-top:1px solid var(--gray); display:flex; justify-content:flex-end;">
-                        <span style="font-size:0.82rem; color:var(--primary); font-weight:600;">View Profile →</span>
+            </div>
+            <div class="mx-doc-body">
+                <div>
+                    @if($doc->specialty)<span class="mx-doc-spec">{{ $doc->specialty->name }}</span>@endif
+                </div>
+                <div style="color:#1e293b; font-size:0.95rem;">
+                    <strong>👨‍💼 {{ $doc->designation ?? 'Consultant' }}</strong><br>
+                    <span style="color:#64748b">📍 {{ $doc->location->name ?? 'Bangladesh' }}</span>
+                </div>
+                <div style="margin-top: auto; padding-top:1rem; text-align:center;">
+                    <div style="padding:0.8rem; background:#eff6ff; color:#1d4ed8; border-radius:8px; font-weight:700;">
+                        Book Appointment
                     </div>
                 </div>
             </div>

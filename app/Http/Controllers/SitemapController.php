@@ -6,6 +6,7 @@ use App\Models\Doctor;
 use App\Models\Brand;
 use App\Models\Location;
 use App\Models\Specialty;
+use App\Models\BlogPost;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -50,6 +51,13 @@ class SitemapController extends Controller
             $sitemaps[] = route('sitemap.show', ['type' => 'combinations', 'page' => $i]);
         }
 
+        // 7. Blog Posts
+        $blogCount = BlogPost::where('is_published', 1)->count();
+        $blogPages = ceil($blogCount / $this->chunkSize);
+        for ($i = 1; $i <= $blogPages; $i++) {
+            $sitemaps[] = route('sitemap.show', ['type' => 'blogs', 'page' => $i]);
+        }
+
         $content = view('sitemap-index', compact('sitemaps', 'now'))->render();
         return response($content, 200)->header('Content-Type', 'application/xml');
     }
@@ -68,6 +76,7 @@ class SitemapController extends Controller
                     ['loc' => route('home'), 'changefreq' => 'daily', 'priority' => '1.0'],
                     ['loc' => route('doctors.index'), 'changefreq' => 'daily', 'priority' => '0.9'],
                     ['loc' => route('medicines.index'), 'changefreq' => 'daily', 'priority' => '0.9'],
+                    ['loc' => route('blog.index'), 'changefreq' => 'daily', 'priority' => '0.9'],
                     ['loc' => route('about'), 'changefreq' => 'monthly', 'priority' => '0.6'],
                     ['loc' => route('privacy'), 'changefreq' => 'monthly', 'priority' => '0.6'],
                     ['loc' => route('disclaimer'), 'changefreq' => 'monthly', 'priority' => '0.6'],
@@ -132,6 +141,18 @@ class SitemapController extends Controller
                         'loc' => \App\Helpers\SeoHelper::getSeoUrl($c->specialty_id, $c->location_id),
                         'changefreq' => 'weekly',
                         'priority' => '0.9'
+                    ];
+                }
+            }
+            elseif ($type === 'blogs') {
+                $blogs = BlogPost::select('slug', 'updated_at')->where('is_published', 1)
+                    ->offset($offset)->limit($this->chunkSize)->get();
+                foreach($blogs as $blog) {
+                    $items[] = [
+                        'loc' => route('blog.show', ['slug' => $blog->slug]),
+                        'lastmod' => $blog->updated_at ? $blog->updated_at->toAtomString() : $now,
+                        'changefreq' => 'weekly',
+                        'priority' => '0.8'
                     ];
                 }
             }

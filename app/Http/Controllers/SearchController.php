@@ -10,15 +10,22 @@ use App\Models\Generic;
 use App\Models\Location;
 use App\Models\Specialty;
 use App\Models\Hospital;
+use App\Models\Medicine;
+use App\Models\BlogPost;
 
 class SearchController extends Controller
 {
     public function home()
     {
         $locations  = Location::orderBy('name')->get();
-        $specialties = Specialty::orderBy('name')->get();
+        $specialties = Specialty::withCount('doctors')->orderByDesc('doctors_count')->get();
         $featuredDoctors = Doctor::with(['location', 'specialty'])->inRandomOrder()->take(6)->get();
         $featuredBrands  = Brand::with('generic')->inRandomOrder()->take(6)->get();
+        $latestPosts = BlogPost::with('category')
+            ->where('is_published', true)
+            ->latest()
+            ->take(3)
+            ->get();
 
         $stats = [
             'doctors'    => Doctor::count(),
@@ -27,7 +34,7 @@ class SearchController extends Controller
             'specialties'=> Specialty::count(),
         ];
 
-        return view('home', compact('locations', 'specialties', 'featuredDoctors', 'featuredBrands', 'stats'));
+        return view('home', compact('locations', 'specialties', 'featuredDoctors', 'featuredBrands', 'latestPosts', 'stats'));
     }
 
     public function searchDoctors(Request $request)
