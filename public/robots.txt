@@ -30,3 +30,5 @@ Allow: /
 
 User-agent: *
 Disallow:
+
+Sitemap: https://ehealthfinder.com/sitemap.xml
