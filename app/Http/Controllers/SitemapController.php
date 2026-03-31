@@ -89,7 +89,7 @@ class SitemapController extends Controller
                 foreach ($docs as $doc) {
                     $items[] = [
                         'loc' => route('doctor.show', ['idslug' => $doc->seo_slug]),
-                        'lastmod' => $doc->updated_at ? $doc->updated_at->toAtomString() : $now,
+                        'lastmod' => $doc->updated_at ? \Carbon\Carbon::parse($doc->updated_at)->toAtomString() : $now,
                         'changefreq' => 'weekly',
                         'priority' => '0.8'
                     ];
@@ -101,7 +101,7 @@ class SitemapController extends Controller
                 foreach ($meds as $med) {
                     $items[] = [
                         'loc' => route('medicine.show', ['id' => $med->id, 'slug' => $med->slug ?? Str::slug($med->name)]),
-                        'lastmod' => $med->updated_at ? $med->updated_at->toAtomString() : $now,
+                        'lastmod' => $med->updated_at ? \Carbon\Carbon::parse($med->updated_at)->toAtomString() : $now,
                         'changefreq' => 'weekly',
                         'priority' => '0.7'
                     ];
@@ -150,7 +150,7 @@ class SitemapController extends Controller
                 foreach($blogs as $blog) {
                     $items[] = [
                         'loc' => route('blog.show', ['slug' => $blog->slug]),
-                        'lastmod' => $blog->updated_at ? $blog->updated_at->toAtomString() : $now,
+                        'lastmod' => $blog->updated_at ? \Carbon\Carbon::parse($blog->updated_at)->toAtomString() : $now,
                         'changefreq' => 'weekly',
                         'priority' => '0.8'
                     ];
