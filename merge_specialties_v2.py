@@ -12,36 +12,38 @@ DB_CONFIG = {
 
 MERGE_RULES = {
     "Pulmonologist / Chest Specialist": ["pulmonolog", "chest", "asthma", "respiratory"],
-    "Gynecologist": ["gynecolog", "gynaecolog", "gynae", "obstetric", "pregnancy"],
-    "Radiologist": ["radiolog", "sonolog"],
-    "Physical Medicine & Physiotherapist": ["physiotherap", "occupational therapist", "physical medicine", "rehabilitation"],
-    "Medicine Specialist": ["medicine", "general practitioner", "general physician", "internal medicine"],
-    "Nutritionist & Dietitian": ["nutritionist", "dietitian", "dietician"],
+    "Gynecologist": ["gynecolog", "gynaecolog", "gynae", "obstetric", "pregnancy","Gyne Doctor"],
+    "Radiologist": ["radiolog", "sonolog", "ultrasonograp", "ct & mri", "x-ray", "echo"],
+    "Physical Medicine & Physiotherapist": ["physiotherap", "occupational therapist", "physical medicine", "rehabilitation", "pysiotherap"],
+    "Medicine Specialist": ["medicine", "general practitioner", "general physician", "internal medicine", "icu"],
+    "Nutritionist & Dietitian": ["nutritionist", "dietitian", "dietician","Nutrition Specialist","Nutrition & Food","Nutrition & Dietetics","Food & Nutrition","Food and Nutrition", "Diet and Nutrition", "Nutrition"],
     "Homeopathy & Unani": ["homeopath", "homoeo", "unani"],
     "Cardiovascular & Thoracic Surgeon": ["cardiothoracic", "thoracic surgeon", "cardiovascular surgeon", "heart surgeon", "vascular surgeon"],
     "Neurosurgeon": ["neurosurgeon", "neurosurgery", "neurospine"],
     "Neurologist": ["neurologist", "neuromedicine", "brain"], 
     "Dermatologist": ["dermatolog", "skin", "vd", "hair"],
-    "Oncologist": ["oncolog", "cancer", "tumor"],
+    "Oncologist": ["oncolog", "cancer", "tumor","Onclogy"],
     "Dentist / Dental Surgeon": ["dentist", "dental", "odontolog", "prosthodontist"],
-    "Hematologist": ["hematolog", "blood"],
-    "Pediatrician": ["pediatric", "paediatric", "child", "neonatolog", "newborn"],
-    "Cardiologist": ["cardiolog"],
+    "Hematologist": ["hematolog", "blood","Haematology"],
+    "Pediatrician": ["pediatric", "paediatric", "child", "neonatolog", "newborn", "neonatal"],
+    "Cardiologist": ["cardiolog", "cardio vascular", "echocardio", "echo"],
     "Ophthalmologist": ["ophthalmolog", "eye", "retina", "cornea", "oculoplastic"],
-    "Endocrinologist": ["endocrinolog", "diabetes", "diabetolog", "hormone"],
+    "Endocrinologist": ["endocrinolog", "endocrinoloist", "endocrionolog", "diabetes", "diabetolog", "hormone", "thyroid"],
     "Rheumatologist": ["rheumatolog", "arthritis"],
-    "Gastroenterologist": ["gastro", "liver", "hepatolog"],
+    "Gastroenterologist": ["gastro", "liver", "hepatolog", "heapatolog", "hepatobiliary"],
     "Urologist": ["urolog", "urinary"],
     "Nephrologist": ["nephrolog", "kidney"],
-    "ENT Specialist": ["ent specialist", "ear", "nose", "throat", "otorhinolaryngolog", "otolaryngolog"],
+    "ENT Specialist": ["ent specialist", "ear", "nose", "throat", "otorhinolaryngolog", "otolaryngolog", "e.n.t", "ent"],
     "Psychiatrist": ["psychiatr", "mental"],
     "Psychologist": ["psycholog"],
     "Orthopedic Surgeon": ["orthopedic", "orthopaedic", "ortho"],
     "Colorectal Surgeon": ["colorectal", "proctolog"],
     "Anesthesiologist": ["anesthesio", "pain"],
-    "Pathologist": ["patholog"],
+    "Pathologist": ["patholog", "microbiology"],
     "Plastic Surgeon": ["plastic"],
     "Sexologist": ["sexolog", "sexual"],
+    "Biochemist": ["biochemis"],
+    "Infertility Specialist": ["infertility", "embryolog"],
     # Put general surgeons at the bottom so specific ones are caught first
     "General Surgeon": ["general surgeon", "surgeon", "surgery", "laparoscopic", "breast surgeon", "hernia surgeon", "pancreatic surgeon"], 
 }
@@ -84,7 +86,7 @@ def merge_specialties():
         # 2. Check merge rules
         matched_main = None
         for main_name, keywords in MERGE_RULES.items():
-            if any(kw in spec_name for kw in keywords):
+            if any(kw.lower().strip() in spec_name for kw in keywords):
                 matched_main = main_name
                 break
                 

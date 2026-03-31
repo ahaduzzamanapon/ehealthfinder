@@ -6,7 +6,7 @@
     $safeImg  = str_replace('\\', '/', $brand->image_path ?? '');
     $imgUrl   = $safeImg ? (Str::startsWith($safeImg, 'http') ? $safeImg : asset($safeImg)) : null;
     $ogImg    = $imgUrl ?? asset('logo.png');
-    $titleStr = "{$brand->name} {$brand->dosage_form} \u2013 Price, Uses & Side Effects";
+    $titleStr = "{$brand->name} {$brand->dosage_form} - Price, Uses & Side Effects";
     $descStr  = "{$brand->name} {$brand->dosage_form} by {$brand->company}. Generic: {$generic}. Price: {$brand->price}. Find indications, dosage, side effects and alternatives on eHealthFinder.";
 
     // Build JSON-LD entirely in PHP to avoid @if inside @section
@@ -53,147 +53,240 @@
     <span>{{ $brand->name }}</span>
 </div>
 <style>
-/* Glassmorphism Tabs Styles */
-.glass-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    background: rgba(255, 255, 255, 0.4);
-    padding: 0.5rem;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(10px);
+/* Floating Language Button */
+.floating-lang-btn {
+    position: fixed !important;
+    bottom: 30px !important;
+    right: 30px !important;
+    z-index: 999999 !important;
+    background: #008e76 !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    font-size: 15px !important;
+    padding: 10px 18px !important;
+    border-radius: 4px !important;
+    border: none !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    transition: background 0.2s !important;
+    font-family: inherit !important;
 }
-.glass-tab {
-    padding: 0.8rem 1.2rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--text);
-    transition: all 0.3s ease;
-    border: 1px solid transparent;
-    font-size: 0.95rem;
-    user-select: none;
+.floating-lang-btn:hover {
+    background: #00735f !important;
 }
-.glass-tab:hover {
-    background: rgba(255, 255, 255, 0.6);
+.floating-lang-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
 }
-.glass-tab.active {
-    background: var(--primary);
-    color: white;
-    box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
-}
-.glass-content {
-    display: none;
-    background: rgba(255, 255, 255, 0.7);
-    padding: 2.5rem;
+
+/* Info Section Block */
+.info-section {
+    background: #ffffff;
+    padding: 2.2rem;
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(12px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    animation: fadeIn 0.4s ease;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    margin-bottom: 2rem;
     line-height: 1.8;
-    color: var(--text);
+    color: #334155;
     font-size: 1.05rem;
 }
-.glass-content.active {
-    display: block;
-}
-.glass-content h4 {
-    color: var(--primary-dark);
+.info-section h4 {
+    color: #1e40af;
     margin-top: 0;
-    font-size: 1.4rem;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid rgba(26, 115, 232, 0.1);
-    padding-bottom: 0.5rem;
-}
-
-/* Language Toggle Switch */
-.lang-toggle-wrapper {
+    font-size: 1.35rem;
+    margin-bottom: 1.2rem;
+    border-bottom: 2px solid #eff6ff;
+    padding-bottom: 0.8rem;
+    font-weight: 800;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    background: rgba(255, 255, 255, 0.7);
-    padding: 0.6rem 1.2rem;
-    border-radius: 50px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    gap: 0.6rem;
 }
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 34px;
+.empty-state {
+    color: #94a3b8;
+    font-style: italic;
 }
-.switch input { 
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #cbd5e1;
-    transition: .4s;
-    border-radius: 34px;
-}
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-input:checked + .slider {
-    background-color: #10b981; /* Green for Bangla */
-}
-input:checked + .slider:before {
-    transform: translateX(26px);
-}
-.lang-label {
-    font-weight: 700;
-    color: #64748b;
-    transition: color 0.3s;
-    font-size: 1.1rem;
-}
-.lang-label.en.active { color: var(--primary); }
-.lang-label.bn.active { color: #10b981; }
 
+/* 2-Column Grid Layout */
+.med-main-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+}
+@media (max-width: 900px) {
+    .med-main-layout {
+        grid-template-columns: 1fr;
+    }
+}
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-.empty-state {
+/* Premium Hero Section */
+.premium-med-hero {
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    border-radius: 20px;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 3rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.03);
+    margin-bottom: 3rem;
+    border: 1px solid #dcfce7;
+    position: relative;
+    overflow: hidden;
+}
+.premium-med-hero::before {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+}
+.med-image-container {
+    flex: 0 0 240px;
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+    border: 1px solid #f1f5f9;
+}
+.med-image-container img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+.med-image-container:hover img {
+    transform: scale(1.05);
+}
+.med-info-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.med-title-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+}
+.med-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+    line-height: 1.2;
+}
+.antibiotic-badge {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #ef4444;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.med-dosage {
+    font-size: 1.2rem;
     color: #64748b;
-    font-style: italic;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+.med-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+.med-tag {
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #334155;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.med-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+.stat-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+}
+.stat-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+.stat-value.price {
+    color: #10b981;
+    font-size: 1.25rem;
+}
+
+@media (max-width: 768px) {
+    .premium-med-hero {
+        flex-direction: column;
+        padding: 1.5rem;
+        gap: 1.5rem;
+    }
+    .med-image-container {
+        flex: none;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    .med-title { font-size: 2rem; }
 }
 </style>
 
+{{-- FIXED FLOATING LANG BUTTON --}}
+<button id="langToggleBtn" class="floating-lang-btn" onclick="toggleLanguage()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7l1.62-4.33L19.12 17h-3.24Z"/></svg>
+    <span>বাংলায় দেখুন</span>
+</button>
 
 {{-- PREMIUM MEDICINE HERO --}}
-<div class="med-profile-hero">
-
-    {{-- Lang Toggle --}}
-    <div class="lang-toggle-wrapper" style="position:absolute; top:1.5rem; right:1.5rem; z-index:2;">
-        <span class="lang-label en active" id="label-en" style="color:rgba(255,255,255,0.9); font-weight:700;">EN</span>
-        <label class="switch">
-            <input type="checkbox" id="langToggle">
-            <span class="slider"></span>
-        </label>
-        <span class="lang-label bn" id="label-bn" style="color:rgba(255,255,255,0.7); font-weight:700;">বাং</span>
-    </div>
-
+<div class="premium-med-hero">
     {{-- Medicine Image --}}
-    <div class="med-img-panel" id="med-img-wrap">
+    <div class="med-image-container" id="med-img-wrap">
         @if($brand->image_path)
             @php $safeImg = str_replace('\\', '/', $brand->image_path); @endphp
             <img id="med-thumb"
@@ -201,45 +294,45 @@ input:checked + .slider:before {
                  alt="{{ $brand->name }}"
                  onmouseenter="showMedPreview(this)" onmouseleave="hideMedPreview()">
             {{-- Hover Preview --}}
-            <div id="med-preview-box" style="display:none;position:fixed;z-index:9999;background:white;border-radius:16px;box-shadow:0 25px 80px rgba(0,0,0,0.25);border:1px solid #e2e8f0;padding:12px;pointer-events:none;">
+            <div id="med-preview-box" style="display:none;position:fixed;z-index:10000;background:white;border-radius:16px;box-shadow:0 25px 80px rgba(0,0,0,0.25);border:1px solid #e2e8f0;padding:12px;pointer-events:none;">
                 <img id="med-preview-img" src="{{ Str::startsWith($safeImg,'http') ? $safeImg : asset($safeImg) }}" style="width:320px;height:320px;object-fit:contain;border-radius:8px;display:block;" alt="{{ $brand->name }}">
             </div>
         @else
-            <div style="font-size:5rem;opacity:0.35;">💊</div>
+            <div style="font-size:4rem;color:#cbd5e1;">💊</div>
         @endif
     </div>
 
     {{-- Medicine Info --}}
-    <div class="med-hero-info-panel">
-        <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap; margin-bottom:0.5rem;">
-            <h1 style="margin:0; font-size:2.2rem; font-weight:800; color:white; text-shadow:0 2px 10px rgba(0,0,0,0.2);">{{ $brand->name }}</h1>
+    <div class="med-info-container">
+        <div class="med-title-row">
+            <h1 class="med-title">{{ $brand->name }}</h1>
             @if($brand->is_antibiotic)
-                <span style="background:rgba(255,100,100,0.3);border:1px solid rgba(255,120,120,0.5);color:white;padding:4px 14px;border-radius:50px;font-size:0.82rem;font-weight:700;">⚠ Antibiotic</span>
+                <span class="antibiotic-badge">⚠️ Antibiotic</span>
             @endif
         </div>
-        <p style="color:rgba(255,255,255,0.8); font-size:1.1rem; margin:0 0 1.5rem; font-style:italic;">{{ $brand->dosage_form }}</p>
+        <p class="med-dosage">{{ $brand->dosage_form }}</p>
 
-        <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+        <div class="med-tags">
             @if($brand->generic)
-                <span class="profile-pill">🧬 {{ $brand->generic->name }}</span>
+                <span class="med-tag"><span style="color:#2563eb;">🧬</span> {{ $brand->generic->name }}</span>
             @endif
             @if($brand->company)
-                <span class="profile-pill">🏭 {{ $brand->company }}</span>
+                <span class="med-tag"><span style="color:#64748b;">🏢</span> {{ $brand->company }}</span>
             @endif
         </div>
 
-        <div class="med-hero-stats">
-            <div class="med-stat-box">
-                <div class="med-stat-label">GENERIC NAME</div>
-                <div class="med-stat-val">{{ $brand->generic->name ?? '—' }}</div>
+        <div class="med-stats-grid">
+            <div class="stat-item">
+                <span class="stat-label">Generic Name</span>
+                <span class="stat-value">{{ $brand->generic->name ?? '—' }}</span>
             </div>
-            <div class="med-stat-box">
-                <div class="med-stat-label">MANUFACTURER</div>
-                <div class="med-stat-val">{{ $brand->company ?: '—' }}</div>
+            <div class="stat-item">
+                <span class="stat-label">Manufacturer</span>
+                <span class="stat-value">{{ $brand->company ?: '—' }}</span>
             </div>
-            <div class="med-stat-box price-box">
-                <div class="med-stat-label">UNIT PRICE</div>
-                <div class="med-stat-val price">{{ $brand->price ?: 'N/A' }}</div>
+            <div class="stat-item">
+                <span class="stat-label">Unit Price</span>
+                <span class="stat-value price">{{ $brand->price ?: 'N/A' }}</span>
             </div>
         </div>
     </div>
@@ -279,31 +372,11 @@ function hideMedPreview() {
     ];
 @endphp
 
-<!-- CLINICAL DATA TABBED INTERFACE -->
-<div style="margin-bottom: 3rem;">
-    <!-- Tab Headers -->
-    <div class="glass-tabs" id="tabMenu">
-        @php $isFirstTab = true; @endphp
-        @foreach($sections as $key => $title)
-            @php 
-                $enKey = $key . '_en';
-                $bnKey = $key . '_bn';
-                $enData = $brand->$enKey; 
-                $bnData = $brand->$bnKey; 
-            @endphp
-            @if(!empty($enData) || !empty($bnData))
-                <div class="glass-tab {{ $isFirstTab ? 'active' : '' }}" data-tab="{{ $key }}" onclick="openTab(this.dataset.tab, event)">
-                    <span class="tab-title-en">{{ $title['en'] }}</span>
-                    <span class="tab-title-bn" style="display:none">{{ $title['bn'] }}</span>
-                </div>
-                @php $isFirstTab = false; @endphp
-            @endif
-        @endforeach
-    </div>
+<!-- CLINICAL DATA & ALTERNATIVES GRID -->
+<div class="med-main-layout">
 
-    <!-- Tab Contents -->
-    <div id="tabContentContainer">
-        @php $isFirstContent = true; @endphp
+    <!-- LEFT COLUMN: Stacked Clinical Info -->
+    <div class="med-details-column">
         @foreach($sections as $key => $title)
             @php 
                 $enKey = $key . '_en';
@@ -312,9 +385,12 @@ function hideMedPreview() {
                 $bnData = $brand->$bnKey; 
             @endphp
             @if(!empty($enData) || !empty($bnData))
-                <div id="tab-{{ $key }}" class="glass-content {{ $isFirstContent ? 'active' : '' }}">
-                    <h4 class="content-title-en">{{ $title['en'] }}</h4>
-                    <h4 class="content-title-bn" style="display:none; font-family: 'SolaimanLipi', sans-serif;">{{ $title['bn'] }}</h4>
+                <div class="info-section">
+                    <h4 class="section-title">
+                        <span style="font-size: 1.1em; color: #3b82f6;">🔹</span>
+                        <span class="title-en">{{ $title['en'] }}</span>
+                        <span class="title-bn" style="display:none; font-family: 'SolaimanLipi', sans-serif;">{{ $title['bn'] }}</span>
+                    </h4>
                     
                     <div class="content-body-en">
                         {!! !empty($enData) ? $enData : '<span class="empty-state">Information not available in English.</span>' !!}
@@ -323,69 +399,71 @@ function hideMedPreview() {
                         {!! !empty($bnData) ? $bnData : '<span class="empty-state">বাংলায় তথ্য পাওয়া যায়নি।</span>' !!}
                     </div>
                 </div>
-                @php $isFirstContent = false; @endphp
             @endif
         @endforeach
     </div>
+
+    <!-- RIGHT COLUMN: Alternatives (Sticky Sidebar) -->
+    <div class="med-sidebar-column">
+        @if(count($alternatives) > 0)
+            <div style="position: sticky; top: 120px; background: white; padding: 1.8rem; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.03);">
+                <h3 style="margin-top: 0; font-size: 1.15rem; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 1rem; margin-bottom: 1.5rem; font-weight: 800;">
+                    Alternative Medicines <br><span style="color:#64748b; font-size: 0.9rem; font-weight: 500;">(Same Generic)</span>
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                    @foreach($alternatives as $alt)
+                        <a href="{{ route('medicine.show', ['id' => $alt->id, 'slug' => Str::slug($alt->name)]) }}" 
+                           style="display: block; padding: 1.2rem; border-radius: 12px; border: 1px solid #f8fafc; text-decoration: none; transition: all 0.2s; background: #f8fafc;">
+                            <h4 style="margin: 0 0 0.4rem; color: #2563eb; font-weight: 700; font-size: 1.05rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;">
+                                {{ $alt->name }} 
+                                <span style="background: white; border: 1px solid #e2e8f0; color: #64748b; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; white-space: nowrap;">{{ $alt->dosage_form }}</span>
+                            </h4>
+                            <p style="margin: 0 0 0.5rem; font-size: 0.9rem; color: #475569; font-weight: 500;">{{ $alt->company }}</p>
+                            <p style="margin: 0; font-weight: 800; color: #10b981; font-size: 1.15rem;">{{ $alt->price }}</p>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+    </div>
+
 </div>
 
-<!-- ALTERNATIVES SECTION -->
-@if(count($alternatives) > 0)
-    <h2 style="margin-bottom: 1.5rem; color: var(--text); border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 0.5rem;">Alternative Medicines <span style="color:var(--text-light); font-size: 1.2rem; font-weight: normal;">(Same Generic)</span></h2>
-    <div class="grid-3">
-        @foreach($alternatives as $alt)
-            <a href="{{ route('medicine.show', ['id' => $alt->id, 'slug' => Str::slug($alt->name)]) }}" style="color:inherit; text-decoration:none;">
-                <div class="card" style="padding: 1.5rem; transition: transform 0.2s; border-left: 4px solid var(--primary)">
-                    <h3 style="margin-top:0; margin-bottom: 0.3rem; color:var(--primary-dark)">{{ $alt->name }} <span style="background:var(--bg); color:var(--text-light); padding:2px 8px; border-radius:12px; font-size:0.8rem; margin-left: 6px;">{{ $alt->dosage_form }}</span></h3>
-                    <p style="margin-bottom:0.8rem; font-size:0.9rem; color: var(--text);"><strong>{{ $alt->company }}</strong></p>
-                    <p style="margin:0; font-weight:800; color:#10b981; font-size: 1.2rem;">{{ $alt->price }}</p>
-                </div>
-            </a>
-        @endforeach
-    </div>
-@endif
-
 <script>
-// Tab Switching Logic
-function openTab(tabId, ev) {
-    // Remove active class from all tabs
-    document.querySelectorAll('.glass-tab').forEach(tab => tab.classList.remove('active'));
-    // Remove active class from all contents
-    document.querySelectorAll('.glass-content').forEach(content => content.classList.remove('active'));
-    
-    // Add active class to clicked tab (using event target)
-    ev.currentTarget.classList.add('active');
-    // Add active class to corresponding content
-    document.getElementById('tab-' + tabId).classList.add('active');
-}
+let currentLang = 'en';
 
-// Language Toggle Logic
-const langToggle = document.getElementById('langToggle');
-const labelEn = document.getElementById('label-en');
-const labelBn = document.getElementById('label-bn');
-
-langToggle.addEventListener('change', function() {
-    const isBn = this.checked;
-    
-    // Toggle Labels
-    if(isBn) {
-        labelBn.classList.add('active');
-        labelEn.classList.remove('active');
-    } else {
-        labelEn.classList.add('active');
-        labelBn.classList.remove('active');
-    }
-    
-    // Toggle ALL EN / BN elements inside Tabs
-    document.querySelectorAll('.tab-title-en').forEach(el => el.style.display = isBn ? 'none' : 'inline');
-    document.querySelectorAll('.tab-title-bn').forEach(el => el.style.display = isBn ? 'inline' : 'none');
-    
-    // Toggle ALL EN / BN elements inside Contents
-    document.querySelectorAll('.content-title-en').forEach(el => el.style.display = isBn ? 'none' : 'block');
-    document.querySelectorAll('.content-title-bn').forEach(el => el.style.display = isBn ? 'block' : 'none');
-    
-    document.querySelectorAll('.content-body-en').forEach(el => el.style.display = isBn ? 'none' : 'block');
-    document.querySelectorAll('.content-body-bn').forEach(el => el.style.display = isBn ? 'block' : 'none');
+document.addEventListener('DOMContentLoaded', function() {
+    // Move the button to body to escape CSS transform contexts that break position:fixed
+    const btn = document.getElementById('langToggleBtn');
+    if (btn) document.body.appendChild(btn);
 });
+
+function toggleLanguage() {
+    currentLang = currentLang === 'en' ? 'bn' : 'en';
+    const btn = document.getElementById('langToggleBtn');
+    
+    // SVG icon to keep in the button
+    const svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7l1.62-4.33L19.12 17h-3.24Z"/></svg>';
+    
+    if (currentLang === 'bn') {
+        btn.innerHTML = svgIcon + '<span>View in English</span>';
+        
+        document.querySelectorAll('.title-en, .content-body-en').forEach(el => el.style.display = 'none');
+        
+        // Show Bangla titles inline
+        document.querySelectorAll('.title-bn').forEach(el => el.style.display = 'inline');
+        // Show Bangla content as block
+        document.querySelectorAll('.content-body-bn').forEach(el => el.style.display = 'block');
+    } else {
+        btn.innerHTML = svgIcon + '<span>বাংলায় দেখুন</span>';
+        
+        // Show English titles inline
+        document.querySelectorAll('.title-en').forEach(el => el.style.display = 'inline');
+        // Show English content as block
+        document.querySelectorAll('.content-body-en').forEach(el => el.style.display = 'block');
+        
+        document.querySelectorAll('.title-bn, .content-body-bn').forEach(el => el.style.display = 'none');
+    }
+}
 </script>
 @endsection
