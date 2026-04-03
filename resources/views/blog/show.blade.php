@@ -154,7 +154,7 @@
             </header>
 
             @if($post->featured_image)
-                <img src="{{ Storage::url($post->featured_image) }}" alt="{{ $post->title }}" class="article-featured-img">
+                <img onerror="this.outerHTML='💊'" src="{{ Storage::url($post->featured_image) }}" alt="{{ $post->title }}" class="article-featured-img">
             @endif
 
             <div class="article-body">
@@ -176,7 +176,7 @@
                         @endif
 
                         @if($sec->image_path)
-                            <img src="{{ Storage::url($sec->image_path) }}" alt="{{ $sec->heading ?? $post->title }}" class="article-section-img">
+                            <img onerror="this.outerHTML='💊'" src="{{ Storage::url($sec->image_path) }}" alt="{{ $sec->heading ?? $post->title }}" class="article-section-img">
                         @endif
                     </section>
                 @endforeach
@@ -229,7 +229,7 @@
                     <a href="{{ url('/' . $rPost->slug) }}" style="display: flex; gap: 1rem; text-decoration: none; color: inherit; align-items: flex-start; transition: transform 0.2s; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9;">
                         <div style="width: 90px; height: 75px; flex-shrink: 0; background: #e2e8f0; border-radius: 8px; overflow: hidden; position: relative;">
                             @if($rPost->featured_image)
-                                <img src="{{ Storage::url($rPost->featured_image) }}" alt="{{ $rPost->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                <img onerror="this.outerHTML='💊'" src="{{ Storage::url($rPost->featured_image) }}" alt="{{ $rPost->title }}" style="width: 100%; height: 100%; object-fit: cover;">
                             @else
                                 <div style="width: 100%; height: 100%; display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:1.2rem;">📰</div>
                             @endif

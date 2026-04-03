@@ -45,7 +45,7 @@
                     <label class="form-label">Main Featured Image (Top of Post)</label>
                     <input type="file" name="featured_image" class="form-control" accept="image/*">
                     @if(isset($post) && $post->featured_image)
-                        <img src="{{ Storage::url($post->featured_image) }}" class="file-preview mt-2" alt="Featured">
+                        <img onerror="this.outerHTML='💊'" src="{{ Storage::url($post->featured_image) }}" class="file-preview mt-2" alt="Featured">
                     @endif
                 </div>
             </div>
@@ -205,7 +205,7 @@ function addSection(data = null) {
             const previewArea = el.querySelector('.image-preview-area');
             previewArea.innerHTML = `
                 <div style="display:flex; align-items:center; gap:1rem;">
-                    <img src="/storage/${data.image_path}" class="file-preview" style="height:50px; width:auto;">
+                    <img onerror="this.outerHTML='💊'" src="/storage/${data.image_path}" class="file-preview" style="height:50px; width:auto;">
                     <label style="color:#f87171; font-size:0.8rem; cursor:pointer;">
                         <input type="checkbox" name="sections[${secIndex}][remove_image]" value="1"> Remove Image
                     </label>

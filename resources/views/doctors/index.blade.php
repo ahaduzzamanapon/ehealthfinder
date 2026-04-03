@@ -241,7 +241,7 @@
         <a href="{{ route('doctor.show', ['idslug' => $doc->seo_slug]) }}" class="mx-doc-card">
             <div class="mx-doc-header">
                 @php $safeImg = str_replace('\\', '/', $doc->image_path); @endphp
-                <img src="{{ Str::startsWith($safeImg, 'http') ? $safeImg : ($safeImg ? asset($safeImg) : 'https://ui-avatars.com/api/?name='.urlencode($doc->name).'&background=1d4ed8&color=fff') }}" class="mx-doc-img" alt="{{ $doc->name }}">
+                <img onerror="this.outerHTML='💊'" src="{{ Str::startsWith($safeImg, 'http') ? $safeImg : ($safeImg ? asset($safeImg) : 'https://ui-avatars.com/api/?name='.urlencode($doc->name).'&background=1d4ed8&color=fff') }}" class="mx-doc-img" alt="{{ $doc->name }}">
                 <div>
                     <div class="mx-doc-info-title">{{ $doc->name }}</div>
                     <div class="mx-doc-info-deg">{{ $doc->degrees }}</div>

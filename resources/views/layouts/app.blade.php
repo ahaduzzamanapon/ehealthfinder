@@ -57,7 +57,7 @@
     <header>
         <div class="nav-container">
             <a href="{{ route('home') }}" class="logo" style="-webkit-text-fill-color:initial; background:none;">
-                <img src="{{ asset('logo.png') }}" alt="eHealthFinder" style="height:42px; width:auto; display:block;">
+                <img onerror="this.outerHTML='💊'" src="{{ asset('logo.png') }}" alt="eHealthFinder" style="height:42px; width:auto; display:block;">
             </a>
             
             <button class="mobile-toggle" onclick="document.querySelector('.nav-links').classList.toggle('active')">
@@ -86,7 +86,7 @@
         <div class="footer-grid">
             <div class="footer-col footer-about">
                 <a href="{{ route('home') }}" class="footer-logo">
-                    <img src="{{ asset('logo.png') }}" alt="eHealthFinder" style="height:40px; width:auto; filter:brightness(0) invert(1); display:block;">
+                    <img onerror="this.outerHTML='💊'" src="{{ asset('logo.png') }}" alt="eHealthFinder" style="height:40px; width:auto; filter:brightness(0) invert(1); display:block;">
                 </a>
                 <p>Bangladesh's leading healthcare portal. Find expert doctors, discover accurate medicine information, and make informed medical decisions — all in one place.</p>
                 <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">

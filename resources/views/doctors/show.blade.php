@@ -247,7 +247,7 @@
 </div>
 
 <div class="mdx-hero">
-    <img src="{{ $imgUrl ?? 'https://ui-avatars.com/api/?name='.urlencode($doctor->name).'&background=4f46e5&color=fff&size=200' }}"
+    <img onerror="this.outerHTML='💊'" src="{{ $imgUrl ?? 'https://ui-avatars.com/api/?name='.urlencode($doctor->name).'&background=4f46e5&color=fff&size=200' }}"
          class="mdx-img" alt="{{ $doctor->name }} - {{ $specialty }} in {{ $location }}">
     <div class="mdx-info">
         <h1 class="mdx-name">{{ $doctor->name }}</h1>

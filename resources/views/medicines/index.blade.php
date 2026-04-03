@@ -172,7 +172,7 @@
             <div class="med-card-img-wrap">
                 @if($brand->image_path)
                     @php $safeImg = str_replace('\\', '/', $brand->image_path); @endphp
-                    <img loading="lazy" src="{{ Str::startsWith($safeImg,'http') ? $safeImg : asset($safeImg) }}" alt="{{ $brand->name }}">
+                    <img onerror="this.outerHTML='💊'" loading="lazy" src="{{ Str::startsWith($safeImg,'http') ? $safeImg : asset($safeImg) }}" alt="{{ $brand->name }}">
                 @else
                     <div class="med-placeholder-icon">💊</div>
                 @endif

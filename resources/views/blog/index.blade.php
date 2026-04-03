@@ -179,7 +179,7 @@
             @forelse($posts as $post)
             <a href="{{ url('/' . $post->slug) }}" class="blog-card">
                 @if($post->featured_image)
-                    <img src="{{ Storage::url($post->featured_image) }}" class="blog-card-img" alt="{{ $post->title }}">
+                    <img onerror="this.outerHTML='💊'" src="{{ Storage::url($post->featured_image) }}" class="blog-card-img" alt="{{ $post->title }}">
                 @else
                     <div class="blog-card-img" style="display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:3rem;">🏥</div>
                 @endif

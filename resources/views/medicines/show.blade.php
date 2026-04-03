@@ -385,13 +385,13 @@
     <div class="med-image-container" id="med-img-wrap">
         @if($brand->image_path)
             @php $safeImg = str_replace('\\', '/', $brand->image_path); @endphp
-            <img id="med-thumb"
+            <img onerror="this.outerHTML='💊'" id="med-thumb"
                  src="{{ Str::startsWith($safeImg,'http') ? $safeImg : asset($safeImg) }}"
                  alt="{{ $brand->name }}"
                  onmouseenter="showMedPreview(this)" onmouseleave="hideMedPreview()">
             {{-- Hover Preview --}}
             <div id="med-preview-box" style="display:none;position:fixed;z-index:10000;background:white;border-radius:16px;box-shadow:0 25px 80px rgba(0,0,0,0.25);border:1px solid #e2e8f0;padding:12px;pointer-events:none;">
-                <img id="med-preview-img" src="{{ Str::startsWith($safeImg,'http') ? $safeImg : asset($safeImg) }}" style="width:320px;height:320px;object-fit:contain;border-radius:8px;display:block;" alt="{{ $brand->name }}">
+                <img onerror="this.outerHTML='💊'" id="med-preview-img" src="{{ Str::startsWith($safeImg,'http') ? $safeImg : asset($safeImg) }}" style="width:320px;height:320px;object-fit:contain;border-radius:8px;display:block;" alt="{{ $brand->name }}">
             </div>
         @else
             <div style="font-size:4rem;color:#cbd5e1;">💊</div>
