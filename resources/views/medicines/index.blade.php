@@ -212,4 +212,57 @@
 <div style="margin-top: 3rem; display: flex; justify-content: center;">
     {{ $brands->appends(request()->query())->links() }}
 </div>
+
+@php
+    $searchQuery = request('q');
+    $faqs = [];
+    if($searchQuery) {
+        $faqs[] = ["q" => "What medicines are related to '{$searchQuery}' in Bangladesh?", "a" => "eHealthFinder currently lists {$brands->total()} medicines matching '{$searchQuery}'. You can view their indications, side effects, and exact unit prices."];
+        $faqs[] = ["q" => "Are the prices shown for '{$searchQuery}' accurate?", "a" => "Yes, the prices shown for '{$searchQuery}' and related medications are updated from pharmaceutical brands in Bangladesh."];
+    } else {
+        $faqs[] = ["q" => "How many medicines are listed on eHealthFinder?", "a" => "eHealthFinder provides an extensive database of thousands of medicines, complete with genuine unit prices, generics, and pharmaceutical companies."];
+        $faqs[] = ["q" => "How can I find the generic alternative of a medicine?", "a" => "Each medicine card lists its active generic ingredient. Searching by this generic name will return all alternate brands."];
+    }
+
+    $faqEntities = [];
+    foreach($faqs as $f) {
+        $faqEntities[] = [
+            "@type" => "Question",
+            "name" => $f['q'],
+            "acceptedAnswer" => ["@type" => "Answer", "text" => $f['a']]
+        ];
+    }
+
+    $itemListElements = [];
+    $pos = 1;
+    foreach($brands as $b) {
+        $itemListElements[] = [
+            "@type" => "ListItem",
+            "position" => $pos++,
+            "url" => route('medicine.show', ['id' => $b->id, 'slug' => \Illuminate\Support\Str::slug($b->name)]),
+            "name" => $b->name
+        ];
+    }
+
+    $indexSchemaJson = json_encode([
+        "@context" => "https://schema.org",
+        "@graph" => [
+            [
+                "@type" => "FAQPage",
+                "mainEntity" => $faqEntities
+            ],
+            [
+                "@type" => "ItemList",
+                "itemListElement" => $itemListElements
+            ]
+        ]
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+@endphp
+
+@section('schema')
+<script type="application/ld+json">{!! $indexSchemaJson !!}</script>
+@endsection
+
+@include('partials.faq-section', ['faqs' => $faqs])
+
 @endsection

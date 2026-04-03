@@ -21,36 +21,97 @@
 
 {{-- JSON-LD Schema equivalent to Shajgoj article structure --}}
 @php
-$schema = [
-    "@context" => "https://schema.org",
-    "@type" => "Article",
-    "mainEntityOfPage" => [
-        "@type" => "WebPage",
-        "@id" => url()->current()
-    ],
-    "headline" => $post->seo_title ?? $post->title,
-    "description" => $post->seo_description,
-    "image" => [
-        $post->featured_image ? url(Storage::url($post->featured_image)) : url('/default-og.png')
-    ],
-    "datePublished" => $post->created_at->toIso8601String(),
-    "dateModified" => $post->updated_at->toIso8601String(),
-    "author" => [
-        "@type" => "Person",
-        "name" => $post->author_name ?? 'eHealthFinder'
-    ],
-    "publisher" => [
-        "@type" => "Organization",
-        "name" => "eHealthFinder",
-        "logo" => [
-            "@type" => "ImageObject",
-            "url" => url('/logo.png')
+    // Fetch reviews
+    $avgRating = $post->averageRating;
+    $reviewCount = $post->reviewCount;
+    $firstReview = $post->reviews()->where('is_approved', true)->latest()->first();
+
+    // Dynamic FAQ for Blog based on Sections
+    $faqs = [];
+    foreach($post->sections as $sec) {
+        if (!empty($sec->heading) && !empty($sec->content)) {
+            $faqs[] = [
+                "q" => strip_tags($sec->heading),
+                "a" => Str::limit(strip_tags($sec->content), 250)
+            ];
+        }
+    }
+    $faqs = array_slice($faqs, 0, 4); // limit to 4
+
+    $docSchema = [
+        "@context" => "https://schema.org",
+        "@type" => "Article",
+        "mainEntityOfPage" => [
+            "@type" => "WebPage",
+            "@id" => url()->current()
+        ],
+        "headline" => $post->seo_title ?? $post->title,
+        "description" => $post->seo_description,
+        "image" => [
+            $post->featured_image ? url(Storage::url($post->featured_image)) : url('/default-og.png')
+        ],
+        "datePublished" => $post->created_at->toIso8601String(),
+        "dateModified" => $post->updated_at->toIso8601String(),
+        "author" => [
+            "@type" => "Person",
+            "name" => $post->author_name ?? 'eHealthFinder'
+        ],
+        "publisher" => [
+            "@type" => "Organization",
+            "name" => "eHealthFinder",
+            "logo" => [
+                "@type" => "ImageObject",
+                "url" => url('/logo.png')
+            ]
         ]
-    ]
-];
+    ];
+
+    if ($reviewCount > 0) {
+        $docSchema["aggregateRating"] = [
+            "@type"       => "AggregateRating",
+            "ratingValue" => number_format($avgRating, 1),
+            "reviewCount" => (string)$reviewCount
+        ];
+    }
+    
+    if ($firstReview) {
+        $docSchema["review"] = [
+            "@type"        => "Review",
+            "reviewRating" => [
+                "@type"       => "Rating",
+                "ratingValue" => (string)$firstReview->rating,
+                "bestRating"  => "5"
+            ],
+            "author"       => [
+                "@type" => "Person",
+                "name"  => $firstReview->author_name
+            ],
+            "reviewBody"   => strip_tags($firstReview->body ?? "Great article.")
+        ];
+    }
+
+    $faqSchema = null;
+    if (count($faqs) > 0) {
+        $faqEntities = [];
+        foreach($faqs as $f) {
+            $faqEntities[] = [
+                "@type" => "Question",
+                "name" => $f['q'],
+                "acceptedAnswer" => ["@type" => "Answer", "text" => $f['a']]
+            ];
+        }
+        $faqSchema = [
+            "@context" => "https://schema.org",
+            "@type" => "FAQPage",
+            "mainEntity" => $faqEntities
+        ];
+    }
+
+    $schemas = [$docSchema];
+    if ($faqSchema) $schemas[] = $faqSchema;
 @endphp
 <script type="application/ld+json">
-{!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+{!! json_encode($schemas, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) !!}
 </script>
 @endsection
 
@@ -129,6 +190,14 @@ $schema = [
                     </div>
                 @endif
             </div>
+            
+            <div style="padding: 0 3rem;">
+                <!-- Dynamic FAQ Section -->
+                @include('partials.faq-section')
+                
+                <!-- Polymorphic User Reviews & Ratings -->
+                @include('partials.review-section', ['model' => $post])
+            </div>
 
             <div style="background: #f8fafc; padding: 2rem 3rem; border-top: 1px solid #e2e8f0; text-align:center;">
                 <h4 style="font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">Share this article</h4>
@@ -137,6 +206,13 @@ $schema = [
                     <a href="https://twitter.com/intent/tweet?url={{ urlencode(url('/' . $post->slug)) }}&text={{ urlencode($post->title) }}" target="_blank" style="padding: 0.6rem 1.2rem; background: #1DA1F2; color: white; border-radius: 8px; text-decoration: none; font-weight: 600;">Twitter</a>
                 </div>
             </div>
+
+            @if(count($faqs) > 0)
+                <div style="padding: 0 3rem 2rem;">
+                    @include('partials.faq-section', ['faqs' => $faqs])
+                </div>
+            @endif
+
         </article>
     </div>
 

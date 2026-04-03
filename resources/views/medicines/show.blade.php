@@ -6,31 +6,127 @@
     $safeImg  = str_replace('\\', '/', $brand->image_path ?? '');
     $imgUrl   = $safeImg ? (Str::startsWith($safeImg, 'http') ? $safeImg : asset($safeImg)) : null;
     $ogImg    = $imgUrl ?? asset('logo.png');
-    $titleStr = "{$brand->name} {$brand->dosage_form} - Price, Uses & Side Effects";
+    $titleStr = trim("{$brand->name} {$brand->dosage_form}") . " - Price, Uses and Side Effects";
     $descStr  = "{$brand->name} {$brand->dosage_form} by {$brand->company}. Generic: {$generic}. Price: {$brand->price}. Find indications, dosage, side effects and alternatives on eHealthFinder.";
 
-    // Build JSON-LD entirely in PHP to avoid @if inside @section
-    $schema = [
-        '@context'        => 'https://schema.org',
-        '@type'           => 'Drug',
-        'name'            => $brand->name,
-        'description'     => $descStr,
-        '@id'             => $medUrl,
-        'url'             => $medUrl,
-        'activeIngredient'=> $generic,
-        'dosageForm'      => $brand->dosage_form,
-        'manufacturer'    => ['@type' => 'Organization', 'name' => $brand->company],
+    // Fetch reviews
+    $avgRating = $brand->averageRating;
+    $reviewCount = $brand->reviewCount;
+    $firstReview = $brand->reviews()->where('is_approved', true)->latest()->first();
+
+    // 1. Drug Schema
+    $drugSchema = [
+        "@context"           => "https://schema.org",
+        "@type"              => "Drug",
+        "name"               => $brand->name,
+        "image"              => $imgUrl ?? "",
+        "brand"              => [
+            "@type" => "Brand",
+            "name"  => $brand->company ?: "Unknown"
+        ],
+        "nonProprietaryName" => $generic ?: "Unknown",
+        "drugUnit"           => $brand->dosage_form ?: "Tablet",
+        "dosageForm"         => $brand->dosage_form ?: "Tablet",
+        "description"        => $descStr,
+        "indication"         => [
+            "@type" => "MedicalIndication",
+            "name"  => Str::limit(strip_tags($brand->indications_en ?? $brand->generic?->indications_en ?? "Treatment of applicable conditions"), 100)
+        ],
+        "prescribingInfo"    => $medUrl,
     ];
-    if ($imgUrl) $schema['image'] = $imgUrl;
-    if ($brand->price) {
-        $schema['offers'] = [
-            '@type'        => 'Offer',
-            'price'        => $brand->price,
-            'priceCurrency'=> 'BDT',
-            'availability' => 'https://schema.org/InStock',
+
+    if ($reviewCount > 0) {
+        $drugSchema["aggregateRating"] = [
+            "@type"       => "AggregateRating",
+            "ratingValue" => number_format($avgRating, 1),
+            "reviewCount" => (string)$reviewCount
         ];
     }
-    $schemaJson = json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    
+    if ($firstReview) {
+        $drugSchema["review"] = [
+            "@type"        => "Review",
+            "reviewRating" => [
+                "@type"       => "Rating",
+                "ratingValue" => (string)$firstReview->rating,
+                "bestRating"  => "5"
+            ],
+            "author"       => [
+                "@type" => "Person",
+                "name"  => $firstReview->author_name
+            ],
+            "reviewBody"   => strip_tags($firstReview->body ?? "Great medicine.")
+        ];
+    }
+
+    if ($brand->price) {
+        preg_match('/(\d+(\.\d+)?)/', str_replace(',', '', $brand->price), $matches);
+        $numericPrice = $matches[1] ?? '0.00';
+        $drugSchema["offers"] = [
+            "@type" => "Offer",
+            "price" => $numericPrice,
+            "priceCurrency" => "BDT",
+            "availability" => "https://schema.org/InStock",
+            "url" => $medUrl,
+            "hasMerchantReturnPolicy" => [
+                "@type" => "MerchantReturnPolicy",
+                "applicableCountry" => "BD",
+                "returnPolicyCategory" => "https://schema.org/MerchantReturnFiniteReturnPeriod",
+                "merchantReturnDays" => 7
+            ],
+            "shippingDetails" => [
+                "@type" => "OfferShippingDetails",
+                "shippingRate" => ["@type" => "MonetaryAmount", "value" => "60", "currency" => "BDT"],
+                "deliveryTime" => [
+                    "@type" => "ShippingDeliveryTime",
+                    "handlingTime" => ["@type" => "QuantitativeValue", "minValue" => 0, "maxValue" => 1, "unitCode" => "DAY"],
+                    "transitTime" => ["@type" => "QuantitativeValue", "minValue" => 1, "maxValue" => 3, "unitCode" => "DAY"]
+                ],
+                "shippingDestination" => ["@type" => "DefinedRegion", "addressCountry" => "BD"]
+            ]
+        ];
+    }
+
+    // 2. FAQ Schema using Real Database Text limits
+    $faqs = [];
+    $text_indications = strip_tags($brand->indications_en ?? $brand->generic?->indications_en ?? '');
+    if ($text_indications) {
+        $faqs[] = ["q" => "What is {$brand->name} used for?", "a" => Str::limit($text_indications, 250)];
+    } else {
+        $faqs[] = ["q" => "What is {$brand->name} used for?", "a" => "{$brand->name} is primarily used for various conditions indicated by your physician."];
+    }
+
+    $text_dosage = strip_tags($brand->dosage_en ?? $brand->generic?->dosage_en ?? '');
+    if ($text_dosage) {
+        $faqs[] = ["q" => "What is the recommended dosage for {$brand->name}?", "a" => Str::limit($text_dosage, 250)];
+    }
+
+    $text_side_effects = strip_tags($brand->side_effects_en ?? $brand->generic?->side_effects_en ?? '');
+    if ($text_side_effects) {
+        $faqs[] = ["q" => "What are the side effects of {$brand->name}?", "a" => Str::limit($text_side_effects, 250)];
+    }
+
+    $faqSchema = null;
+    if (count($faqs) > 0) {
+        $faqEntities = [];
+        foreach($faqs as $f) {
+            $faqEntities[] = [
+                "@type" => "Question",
+                "name" => $f['q'],
+                "acceptedAnswer" => ["@type" => "Answer", "text" => $f['a']]
+            ];
+        }
+        $faqSchema = [
+            "@context" => "https://schema.org",
+            "@type" => "FAQPage",
+            "mainEntity" => $faqEntities
+        ];
+    }
+
+    // Output combined schema array
+    $schemas = [$drugSchema];
+    if ($faqSchema) $schemas[] = $faqSchema;
+    $schemaJson = json_encode($schemas, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 @endphp
 
 @section('title',            "{$titleStr} | eHealthFinder")
@@ -401,6 +497,13 @@ function hideMedPreview() {
                 </div>
             @endif
         @endforeach
+
+        <!-- Dynamic FAQ Section -->
+        @include('partials.faq-section')
+        
+        <!-- Polymorphic User Reviews & Ratings -->
+        @include('partials.review-section', ['model' => $brand])
+        
     </div>
 
     <!-- RIGHT COLUMN: Alternatives (Sticky Sidebar) -->

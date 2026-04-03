@@ -1,6 +1,62 @@
 @extends('layouts.app')
 @section('title', 'Health Blog - eHealthFinder')
 
+@php
+    $catSearch = request('category');
+    $catName = "Health";
+    if($catSearch) {
+        $foundCat = isset($categories) ? collect($categories)->where('slug', $catSearch)->first() : null;
+        if($foundCat) $catName = $foundCat->name;
+    }
+
+    $faqs = [];
+    if($catSearch) {
+        $faqs[] = ["q" => "Where can I find the best articles about {$catName}?", "a" => "You are browsing the dedicated {$catName} category on eHealthFinder, featuring expert medical insights and lifestyle tips."];
+        $faqs[] = ["q" => "Who writes the {$catName} articles?", "a" => "Our {$catName} articles are written and reviewed by verified medical professionals and seasoned health writers."];
+    } else {
+        $faqs[] = ["q" => "What kind of topics are covered in the eHealthFinder Blog?", "a" => "Our blog covers everything from fitness guidance and nutrition tips to deep-dives into complex medical conditions and pharmaceutical data."];
+        $faqs[] = ["q" => "Can I suggest a topic for the blog?", "a" => "Yes, we welcome feedback from patients and doctors alike to cover the most pressing healthcare topics relevant to Bangladesh."];
+    }
+
+    $faqEntities = [];
+    foreach($faqs as $f) {
+        $faqEntities[] = [
+            "@type" => "Question",
+            "name" => $f['q'],
+            "acceptedAnswer" => ["@type" => "Answer", "text" => $f['a']]
+        ];
+    }
+
+    $itemListElements = [];
+    $pos = 1;
+    foreach($posts as $p) {
+        $itemListElements[] = [
+            "@type" => "ListItem",
+            "position" => $pos++,
+            "url" => url('/' . $p->slug),
+            "name" => $p->title
+        ];
+    }
+
+    $indexSchemaJson = json_encode([
+        "@context" => "https://schema.org",
+        "@graph" => [
+            [
+                "@type" => "FAQPage",
+                "mainEntity" => $faqEntities
+            ],
+            [
+                "@type" => "ItemList",
+                "itemListElement" => $itemListElements
+            ]
+        ]
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+@endphp
+
+@section('schema')
+<script type="application/ld+json">{!! $indexSchemaJson !!}</script>
+@endsection
+
 @section('content')
 <style>
 .blog-header {
@@ -148,6 +204,8 @@
         <div style="margin-top: 3rem; display:flex; justify-content:center;">
             {{ $posts->links() }}
         </div>
+
+        @include('partials.faq-section', ['faqs' => $faqs])
 
     </div>
 </div>

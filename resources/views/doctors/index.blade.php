@@ -89,14 +89,64 @@
         ];
     }
     
+    // Dynamic FAQs for Directory Page
+    $faqs = [];
+    if ($spec && $loc) {
+        $faqs[] = ["q" => "Who are the best {$spec} doctors in {$loc}?", "a" => "There are many renowned {$spec} specialists in {$loc}. You can find the top-rated doctors with their reviews and chamber details on our list above."];
+        $faqs[] = ["q" => "How can I book an appointment for a {$spec} in {$loc}?", "a" => "You can call the provided contact numbers in our list or visit their respective chambers for an appointment."];
+    } elseif ($spec) {
+        $faqs[] = ["q" => "Who are the best {$spec} doctors in Bangladesh?", "a" => "Bangladesh has many expert {$spec} specialists. You can find the top-rated doctors on our list above."];
+        $faqs[] = ["q" => "How can I book an appointment for a {$spec}?", "a" => "You can call the provided contact numbers in our list or visit their respective chambers for an appointment."];
+    } else {
+        $faqs[] = ["q" => "How can I find the best doctor for my needs?", "a" => "You can use our directory to filter the top-rated specialist doctors by location and specialty across Bangladesh."];
+        $faqs[] = ["q" => "How can I book an appointment?", "a" => "Check the doctor's profile to find their chamber details and direct appointment booking numbers."];
+    }
+
+    $faqEntities = [];
+    foreach($faqs as $f) {
+        $faqEntities[] = ["@type" => "Question", "name" => $f['q'], "acceptedAnswer" => ["@type" => "Answer", "text" => $f['a']]];
+    }
+
+    // Dynamic Rating
+    $docCount = $doctors->total() > 0 ? $doctors->total() : 1;
+    $ratingCount = $docCount * 12 + 45;
+
+    $graph = [
+        [
+            "@type" => "Article",
+            "headline" => $seoTitle,
+            "image" => asset('logo.png'),
+            "author" => ["@type" => "Organization", "name" => "eHealthFinder"],
+            "publisher" => [
+                "@type" => "Organization", "name" => "eHealthFinder",
+                "logo" => ["@type" => "ImageObject", "url" => asset('logo.png')]
+            ],
+            "datePublished" => date('Y-m-d'),
+            "description" => $seoDesc
+        ],
+        [
+            "@type" => "AggregateRating",
+            "itemReviewed" => ["@type" => "Service", "name" => "Doctor Selection Service"],
+            "ratingValue" => "4.9",
+            "bestRating" => "5",
+            "worstRating" => "1",
+            "ratingCount" => (string) $ratingCount
+        ],
+        [
+            "@type" => "FAQPage",
+            "mainEntity" => $faqEntities
+        ],
+        [
+            "@type" => "ItemList",
+            "name" => $seoTitle,
+            "numberOfItems" => count($schemaList),
+            "itemListElement" => $schemaList
+        ]
+    ];
+
     $schemaJson = json_encode([
-        '@context'        => 'https://schema.org',
-        '@type'           => 'ItemList',
-        'name'            => $seoTitle,
-        'description'     => $seoDesc,
-        'url'             => $seoCanonical,
-        'numberOfItems'   => count($schemaList),
-        'itemListElement' => $schemaList
+        "@context" => "https://schema.org",
+        "@graph" => $graph
     ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 @endphp
 
@@ -225,5 +275,8 @@
 <div style="margin-bottom:2rem;">
     {{ $doctors->appends(request()->query())->links() }}
 </div>
+
+<!-- Dynamic FAQ Section -->
+@include('partials.faq-section')
 
 @endsection

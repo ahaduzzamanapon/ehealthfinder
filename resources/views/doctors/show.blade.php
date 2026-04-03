@@ -8,20 +8,54 @@
     $docUrl     = route('doctor.show', ['idslug' => $doctor->seo_slug]);
     $ogImg      = $imgUrl ?? asset('logo.png');
 
-    // Build JSON-LD as a PHP string to avoid Blade @if nesting inside @section
+    // Fetch reviews
+    $avgRating = $doctor->averageRating;
+    $reviewCount = $doctor->reviewCount;
+    $firstReview = $doctor->reviews()->where('is_approved', true)->latest()->first();
+
+    // Dynamically Generate FAQs from Database Data
+    $faqs = [];
+    $docShortName = Str::before($doctor->name, ' ');
+
+    if (!empty($doctor->about_text)) {
+        $faqs[] = ["q" => "Who is {$doctor->name}?", "a" => Str::limit(strip_tags($doctor->about_text), 250)];
+    }
+
+    if (!empty($doctor->degrees)) {
+        $faqs[] = ["q" => "What are the qualifications of {$doctor->name}?", "a" => "{$docShortName} has completed {$doctor->degrees} and is known as a {$specialty} specialist."];
+    }
+
+    if (!empty($doctor->experience)) {
+        $faqs[] = ["q" => "How many years of experience does {$docShortName} have?", "a" => "{$doctor->name} has {$doctor->experience} of medical experience."];
+    }
+
+    if ($doctor->chambers->count() > 0) {
+        $firstC = $doctor->chambers->first();
+        $faqs[] = ["q" => "Where does {$doctor->name} sit for patient consultation?", "a" => "{$docShortName} regularly sits at {$firstC->hospital->name} located at {$firstC->address}."];
+        if ($firstC->appointment_number) {
+            $faqs[] = ["q" => "What is the appointment number for {$doctor->name}?", "a" => "You can book an appointment by calling: {$firstC->appointment_number}."];
+        }
+    }
+
     $chambers = [];
     foreach ($doctor->chambers as $ch) {
         $c = [
-            '@type'        => 'MedicalClinic',
+            '@type'        => 'MedicalOrganization', // Or MedicalClinic
             'name'         => $ch->hospital->name ?? 'Private Chamber',
-            'address'      => $ch->address ?? '',
+            'address'      => [
+                '@type' => 'PostalAddress',
+                'streetAddress' => $ch->address ?? '',
+                'addressLocality' => $location,
+                'addressCountry' => 'BD'
+            ],
             'openingHours' => $ch->visiting_hour ?? '',
         ];
         if ($ch->appointment_number) $c['telephone'] = $ch->appointment_number;
         $chambers[] = $c;
     }
 
-    $schema = [
+    // Builder Physician Schema
+    $docSchema = [
         '@context'        => 'https://schema.org',
         '@type'           => 'Physician',
         'name'            => $doctor->name,
@@ -31,12 +65,59 @@
         'medicalSpecialty'=> $specialty,
         'address'         => ['@type' => 'PostalAddress', 'addressLocality' => $location, 'addressCountry' => 'BD'],
     ];
-    if ($imgUrl) $schema['image'] = $imgUrl;
-    if (!empty($chambers)) {
-        $schema['hasMap'] = $docUrl;
-        $schema['availableService'] = $chambers;
+    if ($imgUrl) {
+        $docSchema['image'] = [
+            '@type' => 'ImageObject',
+            'url' => $imgUrl
+        ];
     }
-    $schemaJson = json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    if (!empty($chambers)) $docSchema['location'] = $chambers;
+
+    if ($reviewCount > 0) {
+        $docSchema["aggregateRating"] = [
+            "@type"       => "AggregateRating",
+            "ratingValue" => number_format($avgRating, 1),
+            "reviewCount" => (string)$reviewCount
+        ];
+    }
+    if ($firstReview) {
+        $docSchema["review"] = [
+            "@type"        => "Review",
+            "reviewRating" => [
+                "@type"       => "Rating",
+                "ratingValue" => (string)$firstReview->rating,
+                "bestRating"  => "5"
+            ],
+            "author"       => [
+                "@type" => "Person",
+                "name"  => $firstReview->author_name
+            ],
+            "reviewBody"   => strip_tags($firstReview->body ?? "Great doctor.")
+        ];
+    }
+
+    // FAQ Schema
+    $faqSchema = null;
+    if (count($faqs) > 0) {
+        $faqEntities = [];
+        foreach($faqs as $f) {
+            $faqEntities[] = [
+                "@type" => "Question",
+                "name" => $f['q'],
+                "acceptedAnswer" => ["@type" => "Answer", "text" => $f['a']]
+            ];
+        }
+        $faqSchema = [
+            "@context" => "https://schema.org",
+            "@type" => "FAQPage",
+            "mainEntity" => $faqEntities
+        ];
+    }
+
+    // Combine schemas
+    $schemas = [$docSchema];
+    if ($faqSchema) $schemas[] = $faqSchema;
+    $schemaJson = json_encode($schemas, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 @endphp
 
 @section('title',            "{$doctor->name} - {$specialty} in {$location} | eHealthFinder")
@@ -236,4 +317,11 @@
         @endforelse
     </div>
 </div>
+
+<!-- Dynamic FAQ Section -->
+@include('partials.faq-section')
+
+<!-- Polymorphic User Reviews & Ratings -->
+@include('partials.review-section', ['model' => $doctor])
+
 @endsection

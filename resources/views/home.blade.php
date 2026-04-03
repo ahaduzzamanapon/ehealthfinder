@@ -9,6 +9,22 @@
 @section('og_type', 'website')
 
 @php
+   $homeFaqs = [
+       ["q" => "What is eHealthFinder?", "a" => "eHealthFinder is Bangladesh's premier trusted healthcare platform helping you find specialist doctors, view their chamber locations, book appointments, and instantly check up-to-date medicine prices."],
+       ["q" => "How do I find a specialist doctor near me?", "a" => "You can use our smart search bar at the top of the page. Simply search by specialty (e.g., Cardiologist), specific location (e.g., Dhaka), or type in the name of the doctor."],
+       ["q" => "Are the medicine prices accurate?", "a" => "Yes, we maintain a comprehensive and regularly updated database of pharmaceutical prices from authorized brands. However, retail pharmacy prices may vary slightly due to local taxes."],
+       ["q" => "Can I leave reviews for doctors or medicines?", "a" => "Absolutely! eHealthFinder empowers patients by allowing verified users to submit robust star ratings and text feedback to help others make informed healthcare decisions."]
+   ];
+
+   $faqEntities = [];
+   foreach($homeFaqs as $f) {
+       $faqEntities[] = [
+           "@type" => "Question",
+           "name" => $f['q'],
+           "acceptedAnswer" => ["@type" => "Answer", "text" => $f['a']]
+       ];
+   }
+
 $_homeSchema = json_encode([
     '@context' => 'https://schema.org',
     '@graph'   => [
@@ -29,6 +45,10 @@ $_homeSchema = json_encode([
             'logo'        => asset('logo.png'),
             'description' => "Bangladesh's leading healthcare portal for finding specialist doctors and medicine information.",
         ],
+        [
+            '@type'       => 'FAQPage',
+            'mainEntity'  => $faqEntities
+        ]
     ],
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 @endphp
@@ -537,6 +557,19 @@ body {
     </div>
     @endif
 
+</div>
+
+@php
+   $faqs = [
+       ["q" => "What is eHealthFinder?", "a" => "eHealthFinder is Bangladesh's premier trusted healthcare platform helping you find specialist doctors, view their chamber locations, book appointments, and instantly check up-to-date medicine prices."],
+       ["q" => "How do I find a specialist doctor near me?", "a" => "You can use our smart search bar at the top of the page. Simply search by specialty (e.g., Cardiologist), specific location (e.g., Dhaka), or type in the name of the doctor."],
+       ["q" => "Are the medicine prices accurate?", "a" => "Yes, we maintain a comprehensive and regularly updated database of pharmaceutical prices from authorized brands. However, retail pharmacy prices may vary slightly due to local taxes."],
+       ["q" => "Can I leave reviews for doctors or medicines?", "a" => "Absolutely! eHealthFinder empowers patients by allowing verified users to submit robust star ratings and text feedback to help others make informed healthcare decisions."]
+   ];
+@endphp
+
+<div class="mx-container" style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
+    @include('partials.faq-section', ['faqs' => $faqs])
 </div>
 
 <!-- SMART SEARCH JAVASCRIPT LOGIC (RETAINED) -->

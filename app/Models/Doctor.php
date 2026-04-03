@@ -26,4 +26,8 @@ class Doctor extends Model {
         $parts[] = $this->id;
         return implode('-', $parts);
     }
+
+    public function reviews() { return $this->morphMany(Review::class, 'reviewable'); }
+    public function getAverageRatingAttribute() { return round($this->reviews()->where('is_approved', true)->avg('rating') ?: 0, 1); }
+    public function getReviewCountAttribute() { return $this->reviews()->where('is_approved', true)->count(); }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StaticPageController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DoctorAdminController;
@@ -98,14 +99,16 @@ Route::get('/privacy',     [StaticPageController::class, 'privacy'])->name('priv
 Route::get('/disclaimer',  [StaticPageController::class, 'disclaimer'])->name('disclaimer');
 Route::get('/terms',       [StaticPageController::class, 'terms'])->name('terms');
 
+// Reviews
+Route::post('/reviews',    [\App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
+
+
 // Autocomplete API
 Route::get('/api/suggest/doctors',  [SearchController::class, 'suggestDoctors'])->name('api.suggest.doctors');
 Route::get('/api/suggest/medicines',[SearchController::class, 'suggestMedicines'])->name('api.suggest.medicines');
 Route::get('/api/suggest/all',      [SearchController::class, 'suggestAll'])->name('api.suggest.all');
 Route::get('/api/suggest/combined', [SearchController::class, 'suggestCombined'])->name('api.suggest.combined');
 Route::get('/api/quick-links',      [SearchController::class, 'quickLinks'])->name('api.quick-links');
-
-use App\Http\Controllers\BlogController;
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 
