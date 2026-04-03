@@ -126,7 +126,7 @@
         ],
         [
             "@type" => "AggregateRating",
-            "itemReviewed" => ["@type" => "Service", "name" => "Doctor Selection Service"],
+            "itemReviewed" => ["@type" => "MedicalOrganization", "name" => "eHealthFinder Doctors Directory"],
             "ratingValue" => "4.9",
             "bestRating" => "5",
             "worstRating" => "1",
