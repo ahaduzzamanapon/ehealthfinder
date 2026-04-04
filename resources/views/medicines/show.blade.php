@@ -61,7 +61,7 @@
 
     if ($brand->price) {
         preg_match('/(\d+(\.\d+)?)/', str_replace(',', '', $brand->price), $matches);
-        $numericPrice = $matches[1] ?? '0.00';
+        $numericPrice = isset($matches[1]) ? (float) $matches[1] : 0.00;
         $drugSchema["offers"] = [
             "@type" => "Offer",
             "price" => $numericPrice,
@@ -76,7 +76,7 @@
             ],
             "shippingDetails" => [
                 "@type" => "OfferShippingDetails",
-                "shippingRate" => ["@type" => "MonetaryAmount", "value" => "60", "currency" => "BDT"],
+                "shippingRate" => ["@type" => "MonetaryAmount", "value" => 60.00, "currency" => "BDT"],
                 "deliveryTime" => [
                     "@type" => "ShippingDeliveryTime",
                     "handlingTime" => ["@type" => "QuantitativeValue", "minValue" => 0, "maxValue" => 1, "unitCode" => "DAY"],

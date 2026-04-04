@@ -8,10 +8,19 @@ class MedicineController extends Controller
 {
     public function show($id, $slug = null)
     {
-        $brand = Brand::with('generic')->findOrFail($id);
+        $brand = null;
         
-        // SEO Redirect
-        if ($slug !== $brand->slug) {
+        if ($slug) {
+            $brand = Brand::with('generic')->where('slug', $slug)->first();
+        }
+        
+        // Fallback to finding by ID if slug not found or missing
+        if (!$brand) {
+            $brand = Brand::with('generic')->findOrFail($id);
+        }
+        
+        // SEO Canonical Redirect: Ensure both ID and slug strictly match the canonical URL
+        if ($slug !== $brand->slug || (int)$id !== (int)$brand->id) {
             return redirect()->route('medicine.show', ['id' => $brand->id, 'slug' => $brand->slug], 301);
         }
         

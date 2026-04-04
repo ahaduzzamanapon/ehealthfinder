@@ -9,8 +9,6 @@ use App\Models\Brand;
 use App\Models\Generic;
 use App\Models\Location;
 use App\Models\Specialty;
-use App\Models\Hospital;
-use App\Models\Medicine;
 use App\Models\BlogPost;
 
 class SearchController extends Controller
