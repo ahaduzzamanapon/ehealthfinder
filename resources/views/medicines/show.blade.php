@@ -4,7 +4,16 @@
     $generic  = $brand->generic?->name ?? '';
     $medUrl   = route('medicine.show', ['id' => $brand->id, 'slug' => $brand->slug]);
     $safeImg  = str_replace('\\', '/', $brand->image_path ?? '');
-    $imgUrl   = $safeImg ? (Str::startsWith($safeImg, 'http') ? $safeImg : asset($safeImg)) : null;
+    
+    $imgUrl = null;
+    if ($safeImg) {
+        if (Str::startsWith($safeImg, 'http')) {
+            $imgUrl = $safeImg;
+        } elseif (file_exists(public_path($safeImg))) {
+            $imgUrl = asset($safeImg);
+        }
+    }
+    
     $ogImg    = $imgUrl ?? asset('logo.png');
     $titleStr = trim("{$brand->name} {$brand->dosage_form}") . " - Price, Uses and Side Effects";
     $descStr  = "{$brand->name} {$brand->dosage_form} by {$brand->company}. Generic: {$generic}. Price: {$brand->price}. Find indications, dosage, side effects and alternatives on eHealthFinder.";
@@ -19,7 +28,7 @@
         "@context"           => "https://schema.org",
         "@type"              => "Drug",
         "name"               => $brand->name,
-        "image"              => $imgUrl ?? "",
+        "image"              => $ogImg,
         "brand"              => [
             "@type" => "Brand",
             "name"  => $brand->company ?: "Unknown"
