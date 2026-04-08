@@ -9,6 +9,7 @@
     <button onclick="showTab('brands')" id="tab-brands" class="btn btn-primary">💊 Brands ({{ $medicines->total() }})</button>
     <button onclick="showTab('generics')" id="tab-generics" class="btn btn-outline">🧬 Generics ({{ $generics->count() }})</button>
     <button onclick="showTab('add')" id="tab-add" class="btn btn-outline">➕ Add Brand</button>
+    <button onclick="showTab('import')" id="tab-import" class="btn btn-outline" style="margin-left:auto; border-color:#8b5cf6; color:#8b5cf6;">📂 Import JSON</button>
 </div>
 
 {{-- ── TAB: BRANDS LIST ── --}}
@@ -148,18 +149,58 @@
     </div>
 </div>
 
+{{-- ── TAB: IMPORT JSON ── --}}
+<div id="panel-import" style="display:none; max-width:600px;">
+    <div class="admin-card">
+        <h3 style="margin-bottom:0.5rem;">📂 Import Database JSON</h3>
+        <p style="color:#64748b; font-size:0.9rem; margin-bottom:1.5rem;">Upload a phpMyAdmin exported JSON file containing `brands` (b) or `generics` (g) data to bulk import.</p>
+        
+        <form method="POST" action="{{ route('admin.medicines.import') }}" enctype="multipart/form-data">
+            @csrf
+            <div class="form-group" style="padding: 2rem; border:2px dashed #cbd5e1; border-radius:0.5rem; text-align:center; background:#f8fafc; margin-bottom:1.5rem;">
+                <input type="file" name="json_file" accept=".json" required id="json_file" style="display:block; margin: 0 auto;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; background:#8b5cf6; border-color:#8b5cf6;">🚀 Process Import</button>
+        </form>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
 <script>
 function showTab(name) {
-    ['brands','generics','add'].forEach(t => {
+    ['brands','generics','add', 'import'].forEach(t => {
         document.getElementById('panel-'+t).style.display = (t===name) ? 'block' : 'none';
-        document.getElementById('tab-'+t).className = (t===name) ? 'btn btn-primary' : 'btn btn-outline';
+        
+        let tab = document.getElementById('tab-'+t);
+        if(t===name) {
+            tab.className = 'btn btn-primary';
+            if(t==='import') {
+                tab.style.background = '#8b5cf6';
+                tab.style.borderColor = '#8b5cf6';
+                tab.style.color = '#fff';
+            } else {
+                tab.style.background = '';
+                tab.style.borderColor = '';
+                tab.style.color = '';
+            }
+        } else {
+            tab.className = 'btn btn-outline';
+            if(t==='import') {
+                tab.style.background = 'transparent';
+                tab.style.borderColor = '#8b5cf6';
+                tab.style.color = '#8b5cf6';
+            } else {
+                tab.style.background = '';
+                tab.style.borderColor = '';
+                tab.style.color = '';
+            }
+        }
     });
 }
 // Show correct tab on page load (based on URL hash or default)
 const hash = window.location.hash.replace('#','') || 'brands';
-if (['brands','generics','add'].includes(hash)) showTab(hash);
+if (['brands','generics','add','import'].includes(hash)) showTab(hash);
 </script>
 @endsection

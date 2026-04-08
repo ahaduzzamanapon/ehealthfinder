@@ -49,6 +49,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Medicines CRUD
         Route::get('/medicines',             [MedicineAdminController::class, 'index'])->name('medicines.index');
+        Route::post('/medicines/import',     [MedicineAdminController::class, 'importJson'])->name('medicines.import');
         Route::post('/medicines',            [MedicineAdminController::class, 'store'])->name('medicines.store');
         Route::get('/medicines/{medicine}/edit',  [MedicineAdminController::class, 'edit'])->name('medicines.edit');
         Route::put('/medicines/{medicine}',       [MedicineAdminController::class, 'update'])->name('medicines.update');
