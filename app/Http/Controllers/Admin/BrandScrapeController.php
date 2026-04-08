@@ -154,7 +154,12 @@ class BrandScrapeController extends Controller
         $content = preg_replace("#<span[^>]+class=['\"][^'\"]*min-str-toggle[^'\"]*['\"][^>]*>.*?</span>#is", '', $content);
 
         $content = trim($content);
-        return $content !== '' ? $content : null;
+        if ($content === '') {
+            return null;
+        }
+
+        // Decode HTML entities like &zwj; completely so it doesn't render as string literal in blade
+        return html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 
     // ─── Detect captcha / security check page ─────────────────────────
