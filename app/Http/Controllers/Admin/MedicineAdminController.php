@@ -124,8 +124,19 @@ class MedicineAdminController extends Controller
                                 $slug = \Illuminate\Support\Str::slug($name . ' ' . ($b['dosage_form'] ?? '')) . '-' . \Illuminate\Support\Str::random(5);
                             }
 
-                            // Try to map generic ID correctly (ensure it's valid if possible, or null)
-                            $genericId = !empty($b['generic_id']) ? $b['generic_id'] : null;
+                            // Auto-create or map generic by generic_name
+                            $genericId = null;
+                            if (!empty($b['generic_name'])) {
+                                $genName = trim($b['generic_name']);
+                                $realGeneric = \App\Models\Generic::firstOrCreate(
+                                    ['name' => $genName]
+                                );
+                                $genericId = $realGeneric->id;
+                            }
+                            // Fallback if not found by name
+                            if (!$genericId && !empty($b['generic_id'])) {
+                                $genericId = $b['generic_id'];
+                            }
 
                             \App\Models\Brand::create([
                                 'name' => $name,
