@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\GenericAdminController;
 use App\Http\Controllers\Admin\ChamberAdminController;
 use App\Http\Controllers\Admin\BlogCategoryAdminController;
 use App\Http\Controllers\Admin\BlogPostAdminController;
+use App\Http\Controllers\Admin\BrandScrapeController;
 // ── ADMIN ROUTES ─────────────────────────────────────────
 Route::prefix('admin')->name('admin.')->group(function () {
     // Login (no auth needed)
@@ -82,6 +83,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
+
+// ── CRON: Brand scraper (protected by token) ─────────────
+// Every 10 minutes: curl "https://yoursite.com/cron/scrape-brand?token=YOUR_SECRET"
+Route::get('/cron/scrape-brand',   [BrandScrapeController::class, 'scrapeOne'])->name('cron.scrape');
+Route::get('/cron/scrape-progress',[BrandScrapeController::class, 'progress'])->name('cron.progress');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
 Route::get('/sitemap/{type}/{page}.xml', [SitemapController::class, 'show'])->name('sitemap.show');
