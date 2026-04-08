@@ -17,8 +17,18 @@
     }
     
     $ogImg    = $imgUrl ?? asset('logo.png');
-    $titleStr = trim("{$brand->name} {$brand->dosage_form}") . " - Price, Uses and Side Effects";
-    $descStr  = "{$brand->name} {$brand->dosage_form} by {$brand->company}. Generic: {$generic}. Price: {$brand->price}. Find indications, dosage, side effects and alternatives on eHealthFinder.";
+    
+    // SEO Strings
+    if ($isBangla && $brand->bangla_name) {
+        $bName = $brand->bangla_name;
+        $titleStr = "{$bName} - দাম, ব্যবহার ও পার্শ্বপ্রতিক্রিয়া";
+        $descStr  = "{$brand->company} এর {$bName}। জেনেরিক: {$generic}। এর মূল ব্যবহার, মাত্রা (ডোজ), পার্শ্বপ্রতিক্রিয়া এবং বিকল্প ঔষধের তথ্য ই-হেলথ ফাইন্ডারে খুঁজুন।";
+        $kwStr    = "{$bName}, {$generic}, ট্যাবলেটের দাম, {$brand->company}, বাংলাদেশের ঔষধ";
+    } else {
+        $titleStr = trim("{$brand->name} {$brand->dosage_form}") . " - Price, Uses and Side Effects";
+        $descStr  = "{$brand->name} {$brand->dosage_form} by {$brand->company}. Generic: {$generic}. Price: {$brand->price}. Find indications, dosage, side effects and alternatives on eHealthFinder.";
+        $kwStr    = "{$brand->name}, {$generic}, {$brand->dosage_form} price Bangladesh, {$brand->company}, medicine Bangladesh";
+    }
 
     // Fetch reviews
     $avgRating = $brand->averageRating;
@@ -29,7 +39,7 @@
     $drugSchema = [
         "@context"           => "https://schema.org",
         "@type"              => "Drug",
-        "name"               => $brand->name,
+        "name"               => $isBangla && $brand->bangla_name ? $brand->bangla_name : $brand->name,
         "image"              => $ogImg,
         "brand"              => [
             "@type" => "Brand",
@@ -41,9 +51,9 @@
         "description"        => $descStr,
         "indication"         => [
             "@type" => "MedicalIndication",
-            "name"  => Str::limit(strip_tags($brand->indications_en ?? $brand->generic?->indications_en ?? "Treatment of applicable conditions"), 100)
+            "name"  => Str::limit(strip_tags( ($isBangla ? $brand->indications_bn : $brand->indications_en) ?? $brand->generic?->indications_en ?? "Treatment of applicable conditions"), 100)
         ],
-        "prescribingInfo"    => $medUrl,
+        "prescribingInfo"    => $isBangla ? $medUrlBn : $medUrl,
     ];
 
     if ($reviewCount > 0) {
@@ -78,7 +88,7 @@
             "price" => $numericPrice,
             "priceCurrency" => "BDT",
             "availability" => "https://schema.org/InStock",
-            "url" => $medUrl,
+            "url" => $isBangla ? $medUrlBn : $medUrl,
             "hasMerchantReturnPolicy" => [
                 "@type" => "MerchantReturnPolicy",
                 "applicableCountry" => "BD",
@@ -100,21 +110,26 @@
 
     // 2. FAQ Schema using Real Database Text limits
     $faqs = [];
-    $text_indications = strip_tags($brand->indications_en ?? $brand->generic?->indications_en ?? '');
+    $text_indications = strip_tags(($isBangla ? $brand->indications_bn : $brand->indications_en) ?? $brand->generic?->indications_en ?? '');
     if ($text_indications) {
-        $faqs[] = ["q" => "What is {$brand->name} used for?", "a" => Str::limit($text_indications, 250)];
+        $q = $isBangla && $brand->bangla_name ? "{$brand->bangla_name} কি কাজে ব্যবহৃত হয়?" : "What is {$brand->name} used for?";
+        $faqs[] = ["q" => $q, "a" => Str::limit($text_indications, 250)];
     } else {
-        $faqs[] = ["q" => "What is {$brand->name} used for?", "a" => "{$brand->name} is primarily used for various conditions indicated by your physician."];
+        $q = $isBangla && $brand->bangla_name ? "{$brand->bangla_name} কি কাজে ব্যবহৃত হয়?" : "What is {$brand->name} used for?";
+        $a = $isBangla && $brand->bangla_name ? "চিকিৎসকের পরামর্শ অনুযায়ী এই ঔষধটি বিভিন্ন উপসর্গে কার্যকরী।" : "{$brand->name} is primarily used for various conditions indicated by your physician.";
+        $faqs[] = ["q" => $q, "a" => $a];
     }
 
-    $text_dosage = strip_tags($brand->dosage_en ?? $brand->generic?->dosage_en ?? '');
+    $text_dosage = strip_tags(($isBangla ? $brand->dosage_bn : $brand->dosage_en) ?? $brand->generic?->dosage_en ?? '');
     if ($text_dosage) {
-        $faqs[] = ["q" => "What is the recommended dosage for {$brand->name}?", "a" => Str::limit($text_dosage, 250)];
+        $q = $isBangla && $brand->bangla_name ? "{$brand->bangla_name} এর খাওয়ার নিয়ম বা ডোজ কতটুকু?" : "What is the recommended dosage for {$brand->name}?";
+        $faqs[] = ["q" => $q, "a" => Str::limit($text_dosage, 250)];
     }
 
-    $text_side_effects = strip_tags($brand->side_effects_en ?? $brand->generic?->side_effects_en ?? '');
+    $text_side_effects = strip_tags(($isBangla ? $brand->side_effects_bn : $brand->side_effects_en) ?? $brand->generic?->side_effects_en ?? '');
     if ($text_side_effects) {
-        $faqs[] = ["q" => "What are the side effects of {$brand->name}?", "a" => Str::limit($text_side_effects, 250)];
+        $q = $isBangla && $brand->bangla_name ? "{$brand->bangla_name} এর সম্ভাব্য পার্শ্বপ্রতিক্রিয়া গুলো কি?" : "What are the side effects of {$brand->name}?";
+        $faqs[] = ["q" => $q, "a" => Str::limit($text_side_effects, 250)];
     }
 
     $faqSchema = null;
@@ -138,6 +153,7 @@
     $schemas = [$drugSchema];
     if ($faqSchema) $schemas[] = $faqSchema;
     $schemaJson = json_encode($schemas, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
 @endphp
 
 @section('title',            "{$titleStr} | eHealthFinder")
