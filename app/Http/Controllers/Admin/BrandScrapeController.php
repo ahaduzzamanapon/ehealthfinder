@@ -8,27 +8,40 @@ use App\Models\Brand;
 class BrandScrapeController extends Controller
 {
     /**
-     * Called by cron every 10 minutes.
-     * Picks ONE pending brand, scrapes medex.com.bd, saves bangla_name + strength.
-     *
+     * All sections to scrape from medex — key = div id, value = brand column prefix
+     * EN column: key_en, BN column: key_bn
+     */
+    private array $sections = [
+        'indications'       => 'indications',
+        'mode_of_action'    => 'mode_of_action',
+        'dosage'            => 'dosage',
+        'administration'    => 'administration',
+        'interaction'       => 'interaction',
+        'contraindications' => 'contraindications',
+        'side_effects'      => 'side_effects',
+        'pregnancy_cat'     => 'pregnancy_cat',
+        'precautions'       => 'precautions',
+        'pediatric_uses'    => 'pediatric_uses',
+        'storage_conditions'=> 'storage_conditions',
+    ];
+
+    /**
+     * Cron endpoint: pick ONE brand, scrape EN + BN, save all fields.
      * URL: /cron/scrape-brand?token=YOUR_SECRET_TOKEN
      */
     public function scrapeOne()
     {
-        // ─── Token protection ────────────────────────────────────────
         $secret = env('SCRAPE_TOKEN', 'change_me_in_env');
         if (request('token') !== $secret) {
             abort(403, 'Forbidden');
         }
 
-        // ─── Pick one brand: pending first, then retry failed ─────────
-        // failed brands (e.g. captcha/network error) get re-tried automatically
+        // Pick pending first, then retry failed
         $brand = Brand::where('scrape_status', 'pending')
             ->whereNotNull('medex_id')
             ->orderBy('id')
             ->first();
 
-        // If no pending left, retry a failed one
         if (!$brand) {
             $brand = Brand::where('scrape_status', 'failed')
                 ->whereNotNull('medex_id')
@@ -39,67 +52,63 @@ class BrandScrapeController extends Controller
         if (!$brand) {
             return response()->json([
                 'status'  => 'all_done',
-                'message' => 'No more pending brands to scrape.',
+                'message' => 'No more brands to scrape.',
             ]);
         }
 
-        // ─── Scrape the brand page ────────────────────────────────────
         $medexId = $brand->medex_id;
 
         try {
-            // 1) Fetch the English brand page to discover the slug
+            // ── 1. Fetch EN page ──────────────────────────────────────
             $enUrl  = "https://medex.com.bd/brands/{$medexId}/";
             $enHtml = $this->fetchUrl($enUrl);
 
-            // ─── Captcha / Security Check detection ──────────────────────
-            // If medex returns a bot/captcha page, reset to pending and bail out
             if ($this->isCaptchaPage($enHtml)) {
                 $brand->scrape_status = 'pending';
                 $brand->save();
-                return response()->json([
-                    'status'   => 'captcha',
-                    'brand_id' => $brand->id,
-                    'message'  => 'Security check detected on EN page. Reset to pending for retry.',
-                ]);
+                return response()->json(['status' => 'captcha', 'brand_id' => $brand->id,
+                    'message' => 'Security check on EN page. Kept as pending for retry.']);
             }
 
-            // Extract slug from the canonical/redirect URL
-            // medex redirects to the full slug URL, so grab it from <link rel="canonical">
+            // Extract slug for BN URL
             $slug = $this->extractSlug($enHtml, $medexId);
 
-            // 2) Strength: parse from the English page title like "Normens 5 mg Tablet"
-            $strength = $this->extractStrength($enHtml, $brand->name);
+            // ── 2. Fetch BN page ──────────────────────────────────────
+            $bnUrl  = "https://medex.com.bd/brands/{$medexId}/{$slug}/bn";
+            $bnHtml = $this->fetchUrl($bnUrl);
 
-            // 3) Fetch the Bangla page using the resolved slug
-            $bnUrl    = "https://medex.com.bd/brands/{$medexId}/{$slug}/bn";
-            $bnHtml   = $this->fetchUrl($bnUrl);
-
-            // ─── Captcha check on Bangla page too ───────────────────────
             if ($this->isCaptchaPage($bnHtml)) {
                 $brand->scrape_status = 'pending';
                 $brand->save();
-                return response()->json([
-                    'status'   => 'captcha',
-                    'brand_id' => $brand->id,
-                    'message'  => 'Security check detected on BN page. Reset to pending for retry.',
-                ]);
+                return response()->json(['status' => 'captcha', 'brand_id' => $brand->id,
+                    'message' => 'Security check on BN page. Kept as pending for retry.']);
             }
 
-            $banglaName = $this->extractBanglaName($bnHtml);
+            // ── 3. Extract fields ─────────────────────────────────────
+            $data = [
+                'strength'    => $this->extractStrength($enHtml),
+                'bangla_name' => $this->extractBanglaName($bnHtml),
+                'scrape_status' => 'done',
+            ];
 
-            // ─── Save ─────────────────────────────────────────────────
-            $brand->bangla_name   = $banglaName ?: null;
-            $brand->strength      = $strength   ?: null;
-            $brand->scrape_status = 'done';
+            // Extract each clinical section from both pages
+            foreach ($this->sections as $sectionId => $colPrefix) {
+                $data[$colPrefix . '_en'] = $this->extractSection($enHtml, $sectionId);
+                $data[$colPrefix . '_bn'] = $this->extractSection($bnHtml, $sectionId);
+            }
+
+            // ── 4. Save ───────────────────────────────────────────────
+            $brand->fill($data);
             $brand->save();
 
             return response()->json([
                 'status'      => 'success',
                 'brand_id'    => $brand->id,
                 'name'        => $brand->name,
-                'bangla_name' => $banglaName,
-                'strength'    => $strength,
-                'medex_id'    => $medexId,
+                'bangla_name' => $data['bangla_name'],
+                'strength'    => $data['strength'],
+                'sections_en' => array_filter(array_map(fn($k) => $data[$k.'_en'] ? '✓' : '✗', array_values($this->sections))),
+                'sections_bn' => array_filter(array_map(fn($k) => $data[$k.'_bn'] ? '✓' : '✗', array_values($this->sections))),
             ]);
 
         } catch (\Throwable $e) {
@@ -114,7 +123,41 @@ class BrandScrapeController extends Controller
         }
     }
 
-    // ─── Helper: detect captcha / security check page ─────────────
+    // ─── Extract a section's content by its div id ─────────────────────
+    // Medex structure:
+    //   <div id="SECTION_ID"><h3>...</h3></div>
+    //   <div class="ac-body">CONTENT (may have min-str-block > full-str)</div>
+    private function extractSection(string $html, string $sectionId): ?string
+    {
+        // Find ac-body that follows the section's div id
+        $pattern = '#<div[^>]+id=["\']' . preg_quote($sectionId, '#') . '["\'][^>]*>.*?</div>\s*<div[^>]+class=["\']ac-body["\'][^>]*>(.*?)</div>\s*(?=<div|$)#is';
+
+        if (!preg_match($pattern, $html, $m)) {
+            // Fallback: simpler pattern
+            $pattern2 = '#id=["\']' . preg_quote($sectionId, '#') . '["\'].*?<div class=["\']ac-body["\']>(.*?)</div>#is';
+            if (!preg_match($pattern2, $html, $m)) {
+                return null;
+            }
+        }
+
+        $content = $m[1];
+
+        // If it has a full-str block (the non-truncated version), extract that
+        if (preg_match("#<div[^>]+class=['\"]full-str['\"][^>]*>(.*?)</div>\s*</div>#is", $content, $fm)) {
+            $content = $fm[1];
+        }
+
+        // Remove min-str-block wrapper html (toggle buttons etc.)
+        $content = preg_replace("#<div[^>]+class=['\"][^'\"]*min-str[^'\"]*['\"][^>]*>.*?</div>#is", '', $content);
+
+        // Remove "Read more" spans
+        $content = preg_replace("#<span[^>]+class=['\"][^'\"]*min-str-toggle[^'\"]*['\"][^>]*>.*?</span>#is", '', $content);
+
+        $content = trim($content);
+        return $content !== '' ? $content : null;
+    }
+
+    // ─── Detect captcha / security check page ─────────────────────────
     private function isCaptchaPage(string $html): bool
     {
         $lower = strtolower($html);
@@ -127,7 +170,7 @@ class BrandScrapeController extends Controller
             || (strlen($html) < 2000 && str_contains($lower, 'checking your browser'));
     }
 
-    // ─── Helper: fetch URL with a browser-like User-Agent ─────────────
+    // ─── Fetch URL with browser-like headers ──────────────────────────
     private function fetchUrl(string $url): string
     {
         $ch = curl_init($url);
@@ -153,24 +196,21 @@ class BrandScrapeController extends Controller
         return $html;
     }
 
-    // ─── Helper: extract slug from canonical link ───────────────────
+    // ─── Extract the medex slug from canonical link ────────────────────
     private function extractSlug(string $html, $medexId): string
     {
-        // <link rel="canonical" href="https://medex.com.bd/brands/5921/normens-5-mg-tablet/" />
         if (preg_match('#medex\.com\.bd/brands/' . preg_quote($medexId, '#') . '/([^/"]+)#i', $html, $m)) {
             return trim($m[1], '/');
         }
-        // Fallback: try og:url
-        if (preg_match('#og:url.*?content=["\']https://medex\.com\.bd/brands/' . preg_quote($medexId, '#') . '/([^/"]+)#i', $html, $m)) {
-            return trim($m[1], '/');
+        if (preg_match('#og:url.*?content=["\'](https://medex\.com\.bd/brands/' . preg_quote($medexId, '#') . '/([^/"]+))#i', $html, $m)) {
+            return trim($m[2], '/');
         }
-        return 'index'; // last resort
+        return 'index';
     }
 
-    // ─── Helper: extract strength from div[title="Strength"] ────────
-    private function extractStrength(string $html, string $brandName): ?string
+    // ─── Extract strength from <div title="Strength"> ─────────────────
+    private function extractStrength(string $html): ?string
     {
-        // <div title="Strength">\n   40 mg\n</div>
         if (preg_match('#<div[^>]+title=["\']Strength["\'][^>]*>\s*(.*?)\s*</div>#is', $html, $m)) {
             $val = trim(strip_tags($m[1]));
             if ($val !== '') return $val;
@@ -178,23 +218,22 @@ class BrandScrapeController extends Controller
         return null;
     }
 
-    // ─── Helper: extract Bangla brand name from BN page h1 ─────────
+    // ─── Extract Bangla brand name from BN page h1 ────────────────────
+    // <h1 class="page-heading-1-l brand">
+    //   <span class="tx-0-95">ম্যাক্সপ্রো <small>ট্যাবলেট</small></span>
+    // </h1>
     private function extractBanglaName(string $html): ?string
     {
-        // <h1 class="page-heading-1-l brand">
-        //   <span class="tx-0-95">ম্যাক্সপ্রো মাপ্স <small ...>ট্যাবলেট</small></span>
-        // </h1>
-        // We want only the text BEFORE the <small> tag (the actual Bangla brand name)
-        if (preg_match('#<h1[^>]+class=["\'][^"\']*(page-heading-1-l|brand)[^"\'][^>]*>.*?<span[^>]*>(.*?)</span>#is', $html, $m)) {
-            // Remove the <small>...</small> dosage form part
-            $text = preg_replace('#<small[^>]*>.*?</small>#is', '', $m[2]);
+        if (preg_match('#<h1[^>]+class=["\'][^"\']*brand[^"\']*["\'][^>]*>.*?<span[^>]*>(.*?)</span>#is', $html, $m)) {
+            // Strip the <small> dosage form tag
+            $text = preg_replace('#<small[^>]*>.*?</small>#is', '', $m[1]);
             $name = trim(strip_tags($text));
             if ($name !== '') return $name;
         }
         return null;
     }
 
-    // ─── Progress endpoint ──────────────────────────────────────────
+    // ─── Progress endpoint ─────────────────────────────────────────────
     public function progress()
     {
         $secret = env('SCRAPE_TOKEN', 'change_me_in_env');

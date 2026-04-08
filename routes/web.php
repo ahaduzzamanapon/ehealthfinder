@@ -98,7 +98,8 @@ Route::get('/doctors', [SearchController::class, 'searchDoctors'])->name('doctor
 Route::get('/medicines', [SearchController::class, 'searchMedicines'])->name('medicines.index');
 
 Route::get('/doctor/{idslug}', [DoctorController::class, 'show'])->name('doctor.show');
-Route::get('/medicine/{id}/{slug?}', [MedicineController::class, 'show'])->name('medicine.show');
+Route::get('/medicine/{id}/{slug}',     [MedicineController::class, 'show'])->name('medicine.show');
+Route::get('/medicine/{id}/{slug}/bn',  [MedicineController::class, 'show'])->name('medicine.show.bn')->defaults('lang', 'bn');
 
 // Static Pages
 Route::get('/about',       [StaticPageController::class, 'about'])->name('about');

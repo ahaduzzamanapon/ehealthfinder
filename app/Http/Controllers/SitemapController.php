@@ -30,11 +30,18 @@ class SitemapController extends Controller
             $sitemaps[] = route('sitemap.show', ['type' => 'doctors', 'page' => $i]);
         }
 
-        // 3. Medicines
+        // 3. Medicines (English)
         $medicineCount = Brand::count();
         $medPages = ceil($medicineCount / $this->chunkSize);
         for ($i = 1; $i <= $medPages; $i++) {
             $sitemaps[] = route('sitemap.show', ['type' => 'medicines', 'page' => $i]);
+        }
+
+        // 3b. Medicines Bangla (/bn URLs) — only brands that have bangla_name scraped
+        $medBnCount = Brand::whereNotNull('bangla_name')->count();
+        $medBnPages = ceil($medBnCount / $this->chunkSize);
+        for ($i = 1; $i <= $medBnPages; $i++) {
+            $sitemaps[] = route('sitemap.show', ['type' => 'medicines-bn', 'page' => $i]);
         }
 
         // 4. Locations (Searches by City)
@@ -100,10 +107,23 @@ class SitemapController extends Controller
                     ->offset($offset)->limit($this->chunkSize)->get();
                 foreach ($meds as $med) {
                     $items[] = [
-                        'loc' => route('medicine.show', ['id' => $med->id, 'slug' => $med->slug ?? Str::slug($med->name)]),
-                        'lastmod' => $med->updated_at ? \Carbon\Carbon::parse($med->updated_at)->toAtomString() : $now,
+                        'loc'        => route('medicine.show', ['id' => $med->id, 'slug' => $med->slug ?? Str::slug($med->name)]),
+                        'lastmod'    => $med->updated_at ? \Carbon\Carbon::parse($med->updated_at)->toAtomString() : $now,
                         'changefreq' => 'weekly',
-                        'priority' => '0.7'
+                        'priority'   => '0.7'
+                    ];
+                }
+            }
+            elseif ($type === 'medicines-bn') {
+                $meds = Brand::select('id', 'name', 'slug', 'bangla_name', 'updated_at')
+                    ->whereNotNull('bangla_name')
+                    ->offset($offset)->limit($this->chunkSize)->get();
+                foreach ($meds as $med) {
+                    $items[] = [
+                        'loc'        => route('medicine.show.bn', ['id' => $med->id, 'slug' => $med->slug ?? Str::slug($med->name)]),
+                        'lastmod'    => $med->updated_at ? \Carbon\Carbon::parse($med->updated_at)->toAtomString() : $now,
+                        'changefreq' => 'weekly',
+                        'priority'   => '0.7'
                     ];
                 }
             }

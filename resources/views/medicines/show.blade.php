@@ -1,8 +1,10 @@
 @extends('layouts.app')
 
 @php
+    $isBangla = $isBangla ?? false;
     $generic  = $brand->generic?->name ?? '';
     $medUrl   = route('medicine.show', ['id' => $brand->id, 'slug' => $brand->slug]);
+    $medUrlBn = route('medicine.show.bn', ['id' => $brand->id, 'slug' => $brand->slug]);
     $safeImg  = str_replace('\\', '/', $brand->image_path ?? '');
     
     $imgUrl = null;
@@ -141,11 +143,11 @@
 @section('title',            "{$titleStr} | eHealthFinder")
 @section('meta_description', $descStr)
 @section('meta_keywords',    "{$brand->name}, {$generic}, {$brand->dosage_form} price Bangladesh, {$brand->company}, medicine Bangladesh")
-@section('canonical',        $medUrl)
-@section('og_type',          'product')
-@section('og_title',         $titleStr)
-@section('og_description',   $descStr)
-@section('og_image',         $ogImg)
+@section('canonical', $isBangla ? $medUrlBn : $medUrl)
+@section('og_type',    'product')
+@section('og_title',  $titleStr)
+@section('og_description', $descStr)
+@section('og_image',  $ogImg)
 
 @section('schema')
 <script type="application/ld+json">{!! $schemaJson !!}</script>
@@ -383,10 +385,17 @@
 </style>
 
 {{-- FIXED FLOATING LANG BUTTON --}}
-<button id="langToggleBtn" class="floating-lang-btn" onclick="toggleLanguage()">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7l1.62-4.33L19.12 17h-3.24Z"/></svg>
-    <span>বাংলায় দেখুন</span>
-</button>
+@if($isBangla)
+    <a href="{{ $medUrl }}" class="floating-lang-btn" style="text-decoration:none;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7l1.62-4.33L19.12 17h-3.24Z"/></svg>
+        <span>View in English</span>
+    </a>
+@else
+    <a href="{{ $medUrlBn }}" class="floating-lang-btn" style="text-decoration:none;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7l1.62-4.33L19.12 17h-3.24Z"/></svg>
+        <span>বাংলায় দেখুন</span>
+    </a>
+@endif
 
 {{-- PREMIUM MEDICINE HERO --}}
 <div class="premium-med-hero">
@@ -410,7 +419,11 @@
     {{-- Medicine Info --}}
     <div class="med-info-container">
         <div class="med-title-row">
-            <h1 class="med-title">{{ $brand->name }}</h1>
+            @if($isBangla && $brand->bangla_name)
+                <h1 class="med-title">{{ $brand->bangla_name }}</h1>
+            @else
+                <h1 class="med-title">{{ $brand->name }}</h1>
+            @endif
             @if($brand->is_antibiotic)
                 <span class="antibiotic-badge">⚠️ Antibiotic</span>
             @endif
@@ -431,6 +444,12 @@
                 <span class="stat-label">Generic Name</span>
                 <span class="stat-value">{{ $brand->generic->name ?? '—' }}</span>
             </div>
+            @if($brand->strength)
+            <div class="stat-item">
+                <span class="stat-label">Strength</span>
+                <span class="stat-value">{{ $brand->strength }}</span>
+            </div>
+            @endif
             <div class="stat-item">
                 <span class="stat-label">Manufacturer</span>
                 <span class="stat-value">{{ $brand->company ?: '—' }}</span>
@@ -488,21 +507,30 @@ function hideMedPreview() {
                 $bnKey = $key . '_bn';
                 $enData = $brand->$enKey; 
                 $bnData = $brand->$bnKey; 
+                $shouldShow = $isBangla ? !empty($bnData) : (!empty($enData) || !empty($bnData));
             @endphp
-            @if(!empty($enData) || !empty($bnData))
+            @if($shouldShow)
                 <div class="info-section">
                     <h4 class="section-title">
                         <span style="font-size: 1.1em; color: #3b82f6;">🔹</span>
-                        <span class="title-en">{{ $title['en'] }}</span>
-                        <span class="title-bn" style="display:none; font-family: 'SolaimanLipi', sans-serif;">{{ $title['bn'] }}</span>
+                        @if($isBangla)
+                            <span style="font-family: 'SolaimanLipi', sans-serif;">{{ $title['bn'] }}</span>
+                        @else
+                            <span class="title-en">{{ $title['en'] }}</span>
+                            <span class="title-bn" style="display:none; font-family: 'SolaimanLipi', sans-serif;">{{ $title['bn'] }}</span>
+                        @endif
                     </h4>
                     
-                    <div class="content-body-en">
-                        {!! !empty($enData) ? $enData : '<span class="empty-state">Information not available in English.</span>' !!}
-                    </div>
-                    <div class="content-body-bn" style="display:none; font-family: 'SolaimanLipi', sans-serif;">
-                        {!! !empty($bnData) ? $bnData : '<span class="empty-state">বাংলায় তথ্য পাওয়া যায়নি।</span>' !!}
-                    </div>
+                    @if($isBangla)
+                        <div style="font-family: 'SolaimanLipi', sans-serif;">{!! $bnData !!}</div>
+                    @else
+                        <div class="content-body-en">
+                            {!! !empty($enData) ? $enData : '<span class="empty-state">Information not available in English.</span>' !!}
+                        </div>
+                        <div class="content-body-bn" style="display:none; font-family: 'SolaimanLipi', sans-serif;">
+                            {!! !empty($bnData) ? $bnData : '<span class="empty-state">বাংলায় তথ্য পাওয়া যায়নি।</span>' !!}
+                        </div>
+                    @endif
                 </div>
             @endif
         @endforeach
