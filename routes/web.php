@@ -111,6 +111,17 @@ Route::get('/terms',       [StaticPageController::class, 'terms'])->name('terms'
 Route::post('/reviews',    [\App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
 
 
+// ── Mobile App JSON API v1 ────────────────────────────────
+Route::prefix('api/v1')->name('api.v1.')->group(function () {
+    Route::get('/home',                [\App\Http\Controllers\Api\HomeApiController::class,    'index'])->name('home');
+    Route::get('/medicines',           [\App\Http\Controllers\Api\MedicineApiController::class,'index'])->name('medicines.index');
+    Route::get('/medicines/{id}',      [\App\Http\Controllers\Api\MedicineApiController::class,'show'])->name('medicines.show');
+    Route::get('/doctors',             [\App\Http\Controllers\Api\DoctorApiController::class,  'index'])->name('doctors.index');
+    Route::get('/doctors/{id}',        [\App\Http\Controllers\Api\DoctorApiController::class,  'show'])->name('doctors.show');
+    Route::get('/blogs',               [\App\Http\Controllers\Api\BlogApiController::class,    'index'])->name('blogs.index');
+    Route::get('/blogs/{slug}',        [\App\Http\Controllers\Api\BlogApiController::class,    'show'])->name('blogs.show');
+});
+
 // Autocomplete API
 Route::get('/api/suggest/doctors',  [SearchController::class, 'suggestDoctors'])->name('api.suggest.doctors');
 Route::get('/api/suggest/medicines',[SearchController::class, 'suggestMedicines'])->name('api.suggest.medicines');
