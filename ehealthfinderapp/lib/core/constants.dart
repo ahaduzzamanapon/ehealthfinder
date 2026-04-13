@@ -1,36 +1,43 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Brand Colors
-  static const primary     = Color(0xFF0EA47A);
-  static const primaryDark = Color(0xFF0B8563);
-  static const primaryLight= Color(0xFFE6F7F2);
-  static const secondary   = Color(0xFF2563EB);
-  static const accent      = Color(0xFFF59E0B);
+  // ── PRIMARY BRAND ─ Indigo/Purple (matches ehealthfinder.com)
+  static const primary      = Color(0xFF4F46E5); // Indigo-600 — search btn, hero text
+  static const primaryDark  = Color(0xFF3730A3); // Indigo-800 — pressed/dark
+  static const primaryLight = Color(0xFFEEF2FF); // Indigo-50  — chip/badge bg
 
-  // Backgrounds
-  static const bgLight  = Color(0xFFF8FAFC);
-  static const bgCard   = Color(0xFFFFFFFF);
-  static const bgDark   = Color(0xFF0F172A);
+  // ── SECONDARY ─ Teal (logo heart color)
+  static const secondary    = Color(0xFF06B6D4); // Cyan-500 — logo teal, doctor accent
+  static const secondaryLight = Color(0xFFECFEFF); // Cyan-50
 
-  // Text
-  static const textDark   = Color(0xFF0F172A);
-  static const textMed    = Color(0xFF475569);
-  static const textLight  = Color(0xFF94A3B8);
+  // ── ACCENT
+  static const accent       = Color(0xFFF59E0B); // Amber — rating, price
 
-  // Utility
-  static const danger  = Color(0xFFEF4444);
-  static const success = Color(0xFF10B981);
-  static const border  = Color(0xFFE2E8F0);
+  // ── BACKGROUNDS
+  static const bgLight      = Color(0xFFF8F7FF); // Lavender-white (website bg)
+  static const bgCard       = Color(0xFFFFFFFF); // Pure white cards
+  static const bgDark       = Color(0xFF1E1B4B); // Navy dark (website dark text)
+
+  // ── TEXT
+  static const textDark     = Color(0xFF1E1B4B); // Dark navy (matches website heading)
+  static const textMed      = Color(0xFF475569); // Slate-600
+  static const textLight    = Color(0xFF94A3B8); // Slate-400
+
+  // ── UTILITY
+  static const danger       = Color(0xFFEF4444); // Red
+  static const success      = Color(0xFF10B981); // Emerald — green dot badge
+  static const border       = Color(0xFFE8E7F8); // Indigo-tinted border
+  static const highlight    = Color(0xFF7C3AED); // Violet — for special badges
 }
 
 class AppConstants {
   static const baseUrl = 'https://ehealthfinder.com';
   static const apiUrl  = '$baseUrl/api/v1';
 
-  // Local dev: static const apiUrl = 'http://10.0.2.2:8000/api/v1';
+  // Local dev:
+  // static const apiUrl = 'http://10.0.2.2:8000/api/v1';
 
-  static const appName = 'eHealthFinder';
+  static const appName    = 'eHealthFinder';
   static const appTagline = 'বাংলাদেশের স্বাস্থ্যসেবা প্ল্যাটফর্ম';
 }
 

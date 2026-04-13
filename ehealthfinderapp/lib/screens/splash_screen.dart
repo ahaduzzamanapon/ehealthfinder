@@ -51,9 +51,9 @@ class _SplashScreenState extends State<SplashScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF0B2A1F),
-              Color(0xFF0EA47A),
-              Color(0xFF0B5E47),
+              Color(0xFF1E1B4B), // Deep navy
+              Color(0xFF4F46E5), // Indigo primary
+              Color(0xFF7C3AED), // Violet accent
             ],
           ),
         ),
@@ -115,7 +115,7 @@ class _SplashScreenState extends State<SplashScreen>
                         ],
                       );
                     },
-                    child: Container(
+                      child: Container(
                       width: 96,
                       height: 96,
                       decoration: BoxDecoration(
@@ -123,17 +123,19 @@ class _SplashScreenState extends State<SplashScreen>
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.25),
+                            color: Colors.black.withAlpha(64),
                             blurRadius: 30,
                             spreadRadius: 5,
                           ),
                         ],
                       ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.local_hospital_rounded,
-                          color: AppColors.primary,
-                          size: 52,
+                      child: ClipOval(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Image.asset(
+                            'assets/images/icon.png',
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     ),

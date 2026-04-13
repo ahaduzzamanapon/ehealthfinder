@@ -33,7 +33,7 @@ class EHealthFinderApp extends StatelessWidget {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         surface: AppColors.bgCard,
-        background: AppColors.bgLight,
+        brightness: Brightness.light,
       ),
       textTheme: GoogleFonts.poppinsTextTheme(),
       scaffoldBackgroundColor: AppColors.bgLight,

@@ -75,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF065F46), AppColors.primary, Color(0xFF059669)],
+              colors: [Color(0xFF1E1B4B), AppColors.primary, Color(0xFF7C3AED)],
             ),
           ),
           child: SafeArea(
@@ -92,8 +92,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.local_hospital_rounded,
-                            color: AppColors.primary, size: 22),
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/images/icon.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 10),
                       const Column(
@@ -134,10 +138,20 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildContent() {
     if (_homeData == null) return const SizedBox();
     final stats = _homeData!['stats'] as Map<String, dynamic>? ?? {};
-    final meds = (_homeData!['featured_medicines'] as List?)
-            ?.map((m) => MedicineModel.fromJson(m)).toList() ?? [];
-    final docs = (_homeData!['featured_doctors'] as List?)
-            ?.map((d) => DoctorModel.fromJson(d)).toList() ?? [];
+
+    // Safe list extractor — handles both List and Map (cached Eloquent collection)
+    List<dynamic> _safeList(String key) {
+      final raw = _homeData![key];
+      if (raw == null) return [];
+      if (raw is List) return raw;
+      if (raw is Map) return raw.values.toList(); // old cache edge case
+      return [];
+    }
+
+    final meds = _safeList('featured_medicines')
+        .map((m) => MedicineModel.fromJson(m as Map<String, dynamic>)).toList();
+    final docs = _safeList('featured_doctors')
+        .map((d) => DoctorModel.fromJson(d as Map<String, dynamic>)).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
       {'label': 'Medicines', 'icon': Icons.medication_rounded,
        'color': AppColors.primary, 'bg': AppColors.primaryLight},
       {'label': 'Doctors', 'icon': Icons.medical_services_rounded,
-       'color': AppColors.secondary, 'bg': const Color(0xFFEFF6FF)},
+       'color': AppColors.secondary, 'bg': const Color(0xFFECFEFF)},
       {'label': 'Emergency', 'icon': Icons.emergency_rounded,
        'color': const Color(0xFFEF4444), 'bg': const Color(0xFFFEF2F2)},
       {'label': 'Blog', 'icon': Icons.article_rounded,
