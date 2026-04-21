@@ -47,16 +47,21 @@ class MedicineController extends Controller
         $letter = strtoupper($request->get('letter', 'A'));
         $letter = preg_match('/^[A-Z]$/', $letter) ? $letter : 'A';
 
-        // All unique first letters for the alphabet nav (stored as plain array to avoid cache unserialize issues)
-        $letters = Cache::remember('med_letters', 3600, function () {
+        // All unique first letters for the alphabet nav (plain array, versioned cache key)
+        $letters = Cache::remember('med_letters_arr_v2', 3600, function () {
             return Brand::selectRaw('UPPER(LEFT(name,1)) as letter')
                 ->distinct()
                 ->orderByRaw('UPPER(LEFT(name,1))')
                 ->pluck('letter')
                 ->filter(fn($l) => preg_match('/^[A-Z]$/', $l))
                 ->values()
-                ->toArray();
+                ->all(); // ->all() returns plain PHP array (same as toArray() but no recursion)
         });
+
+        // Safety: ensure $letters is always a plain array (guards against stale serialized cache)
+        if (!is_array($letters)) {
+            $letters = [];
+        }
 
         // All medicines starting with selected letter, paginated
         $medicines = Brand::select('id','name','slug','dosage_form','company','price','strength')
