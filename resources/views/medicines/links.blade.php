@@ -161,10 +161,10 @@
 <nav class="alpha-nav" aria-label="Browse medicines by letter">
     @php $allLetters = range('A','Z'); @endphp
     @foreach($allLetters as $l)
-        @php $hasLetter = $letters->contains($l); @endphp
+        @php $hasLetter = in_array($l, $letters); @endphp
         <a href="{{ $hasLetter ? route('medicine.links', ['letter' => $l]) : '#' }}"
            class="alpha-btn {{ $l === $letter ? 'active' : '' }} {{ !$hasLetter ? 'empty' : '' }}"
-           title="{{ $hasLetter ? "Medicines starting with $l" : 'No medicines' }}">
+           title="{{ $hasLetter ? 'Medicines starting with '.$l : 'No medicines' }}">
             {{ $l }}
         </a>
     @endforeach
