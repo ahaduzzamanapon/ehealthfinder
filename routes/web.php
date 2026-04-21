@@ -6,6 +6,7 @@ use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StaticPageController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DoctorAdminController;
@@ -108,6 +109,11 @@ Route::get('/disclaimer',  [StaticPageController::class, 'disclaimer'])->name('d
 Route::get('/terms',       [StaticPageController::class, 'terms'])->name('terms');
 Route::get('/refund-policy', [StaticPageController::class, 'refund'])->name('refund');
 Route::get('/return-policy', fn() => redirect()->route('refund', [], 301));
+
+// Checkout
+Route::get('/medicine/{id}/{slug}/buy',  [CheckoutController::class, 'buy'])->name('checkout.buy');
+Route::post('/checkout/place',           [CheckoutController::class, 'place'])->name('checkout.place');
+Route::get('/order/success',             [CheckoutController::class, 'success'])->name('checkout.success');
 
 // Reviews
 Route::post('/reviews',    [\App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');

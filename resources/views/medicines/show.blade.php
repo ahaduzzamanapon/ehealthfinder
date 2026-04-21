@@ -551,53 +551,33 @@
             </div>
         </div>
 
-        {{-- ── BUY / PURCHASE SECTION (Google Merchant Center compliance) ── --}}
-        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
+        {{-- ── BUY / PURCHASE SECTION ── --}}
+        <div style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid #e2e8f0;">
             @if($brand->price)
-            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1.2rem;">
-                <span style="font-size:2rem; font-weight:900; color:#10b981;">{{ $brand->price }}</span>
-                <span style="background:#dcfce7; color:#166534; padding:4px 12px; border-radius:50px; font-size:0.85rem; font-weight:700;">✅ In Stock</span>
-                <span style="color:#64748b; font-size:0.9rem;">per unit · Bangladesh</span>
+            <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.2rem;">
+                <span style="font-size:2rem;font-weight:900;color:#10b981;">{{ $brand->price }}</span>
+                <span style="background:#dcfce7;color:#166534;padding:4px 14px;border-radius:50px;font-size:0.85rem;font-weight:700;">✅ In Stock</span>
+                <span style="color:#64748b;font-size:0.9rem;">per unit · Bangladesh</span>
             </div>
             @endif
 
-            {{-- Primary CTA: Buy Now --}}
-            <a href="https://www.chaldal.com/search#query={{ urlencode($brand->name) }}"
-               target="_blank" rel="noopener"
+            <a href="{{ route('checkout.buy', ['id' => $brand->id, 'slug' => $brand->slug]) }}"
                id="buy-now-btn"
-               style="display:inline-flex; align-items:center; gap:0.6rem;
-                      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-                      color: white; font-weight: 800; font-size: 1.1rem;
-                      padding: 0.9rem 2rem; border-radius: 12px;
-                      text-decoration: none; margin-bottom: 0.75rem;
-                      box-shadow: 0 6px 20px rgba(79,70,229,0.35);
-                      transition: transform 0.2s, box-shadow 0.2s;
-                      width: 100%; max-width: 340px; justify-content: center;"
-               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 28px rgba(79,70,229,0.45)';"
-               onmouseout="this.style.transform=''; this.style.boxShadow='0 6px 20px rgba(79,70,229,0.35)';">
-                🛒 Buy Now — Find in Online Pharmacy
+               style="display:flex;align-items:center;justify-content:center;gap:0.7rem;
+                      background:linear-gradient(135deg,#4f46e5,#7c3aed);
+                      color:white;font-weight:800;font-size:1.1rem;
+                      padding:1rem 2rem;border-radius:14px;text-decoration:none;
+                      box-shadow:0 6px 24px rgba(79,70,229,0.35);
+                      transition:transform 0.2s,box-shadow 0.2s;
+                      max-width:360px;"
+               onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 32px rgba(79,70,229,0.45)';"
+               onmouseout="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(79,70,229,0.35)';">
+                🛒 Buy Now
             </a>
 
-            <br>
-
-            {{-- Secondary CTA: Find in nearby pharmacy --}}
-            <a href="https://www.shajgoj.com/search/?q={{ urlencode($brand->name) }}"
-               target="_blank" rel="noopener"
-               style="display:inline-flex; align-items:center; gap:0.6rem;
-                      background: white; color: #4f46e5; font-weight: 700;
-                      font-size: 0.95rem; padding: 0.75rem 1.5rem;
-                      border-radius: 10px; text-decoration: none;
-                      border: 2px solid #4f46e5;
-                      max-width: 340px; justify-content: center;
-                      transition: all 0.2s;"
-               onmouseover="this.style.background='#eff6ff';"
-               onmouseout="this.style.background='white';">
-                🏥 Find at Local Pharmacy
-            </a>
-
-            <p style="font-size:0.8rem; color:#94a3b8; margin-top:0.75rem;">
-                🔒 Secure purchase via trusted pharmacy partners &nbsp;·&nbsp;
-                <a href="{{ route('refund') }}" style="color:#4f46e5; font-weight:600;">Return & Refund Policy</a>
+            <p style="font-size:0.8rem;color:#94a3b8;margin-top:0.85rem;">
+                🔒 Secure checkout &nbsp;·&nbsp;
+                <a href="{{ route('refund') }}" style="color:#4f46e5;font-weight:600;">Return & Refund Policy</a>
             </p>
         </div>
     </div>
