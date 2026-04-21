@@ -222,53 +222,11 @@
             <div class="form-section-title">💳 Payment Method</div>
             <div class="payment-tabs">
                 <div class="pay-tab active" onclick="selectPayment('cod', this)">💵 Cash on Delivery</div>
-                <div class="pay-tab" onclick="selectPayment('bkash', this)">📱 bKash</div>
-                <div class="pay-tab" onclick="selectPayment('nagad', this)">📱 Nagad</div>
-                <div class="pay-tab" onclick="selectPayment('card', this)">💳 Card</div>
             </div>
             <input type="hidden" name="payment_method" id="payment_method" value="cod">
 
             <div id="panel-cod" class="pay-panel active">
                 <div class="cod-note">✅ Pay when your medicine is delivered at your door. No advance payment needed.</div>
-            </div>
-            <div id="panel-bkash" class="pay-panel">
-                <div class="form-group">
-                    <label>bKash Number</label>
-                    <input type="text" placeholder="01XXXXXXXXX (personal/merchant)" name="bkash_number">
-                </div>
-                <div class="form-group">
-                    <label>Transaction ID</label>
-                    <input type="text" placeholder="bKash TrxID after payment" name="bkash_trx">
-                </div>
-                <p style="font-size:.82rem;color:#64748b;">Send payment to: <strong>01XXXXXXXXX</strong> (Merchant). Then enter Transaction ID above.</p>
-            </div>
-            <div id="panel-nagad" class="pay-panel">
-                <div class="form-group">
-                    <label>Nagad Number</label>
-                    <input type="text" placeholder="01XXXXXXXXX" name="nagad_number">
-                </div>
-                <div class="form-group">
-                    <label>Transaction ID</label>
-                    <input type="text" placeholder="Nagad TrxID after payment" name="nagad_trx">
-                </div>
-                <p style="font-size:.82rem;color:#64748b;">Send payment to: <strong>01XXXXXXXXX</strong> (Merchant). Then enter Transaction ID above.</p>
-            </div>
-            <div id="panel-card" class="pay-panel">
-                <div class="form-group">
-                    <label>Card Number</label>
-                    <input type="text" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" name="card_number">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Expiry</label>
-                        <input type="text" placeholder="MM/YY" maxlength="5" name="card_expiry">
-                    </div>
-                    <div class="form-group">
-                        <label>CVV</label>
-                        <input type="text" placeholder="XXX" maxlength="4" name="card_cvv">
-                    </div>
-                </div>
-                <p style="font-size:.78rem;color:#94a3b8;">🔒 This is a demo. Do not enter real card details.</p>
             </div>
         </form>
     </div>
@@ -354,14 +312,6 @@
         document.getElementById('qty-hidden').value         = qty;
         document.getElementById('subtotal').textContent     = (unitPrice * qty).toFixed(2);
         document.getElementById('total-price').textContent  = (unitPrice * qty + 60).toFixed(2);
-    }
-
-    function selectPayment(method, el) {
-        document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.pay-panel').forEach(p => p.classList.remove('active'));
-        el.classList.add('active');
-        document.getElementById('panel-' + method).classList.add('active');
-        document.getElementById('payment_method').value = method;
     }
 </script>
 @endsection
