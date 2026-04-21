@@ -34,14 +34,14 @@ class SitemapController extends Controller
         $medicineCount = Brand::count();
         $medPages = ceil($medicineCount / $this->chunkSize);
         for ($i = 1; $i <= $medPages; $i++) {
-            $sitemaps[] = route('sitemap.show', ['type' => 'medicines', 'page' => $i]);
+            $sitemaps[] = route('sitemap.show', ['type' => 'medicines_new', 'page' => $i]);
         }
 
         // 3b. Medicines Bangla (/bn URLs) — only brands that have bangla_name scraped
         $medBnCount = Brand::whereNotNull('bangla_name')->count();
         $medBnPages = ceil($medBnCount / $this->chunkSize);
         for ($i = 1; $i <= $medBnPages; $i++) {
-            $sitemaps[] = route('sitemap.show', ['type' => 'medicines-bn', 'page' => $i]);
+            $sitemaps[] = route('sitemap.show', ['type' => 'medicines-bn_new', 'page' => $i]);
         }
 
         // 4. Locations (Searches by City)
@@ -83,6 +83,7 @@ class SitemapController extends Controller
                     ['loc' => route('home'), 'changefreq' => 'daily', 'priority' => '1.0'],
                     ['loc' => route('doctors.index'), 'changefreq' => 'daily', 'priority' => '0.9'],
                     ['loc' => route('medicines.index'), 'changefreq' => 'daily', 'priority' => '0.9'],
+                    ['loc' => route('medicine.links'), 'changefreq' => 'daily', 'priority' => '0.9'],
                     ['loc' => route('blog.index'), 'changefreq' => 'daily', 'priority' => '0.9'],
                     ['loc' => route('about'), 'changefreq' => 'monthly', 'priority' => '0.6'],
                     ['loc' => route('privacy'), 'changefreq' => 'monthly', 'priority' => '0.6'],
@@ -103,7 +104,7 @@ class SitemapController extends Controller
                     ];
                 }
             } 
-            elseif ($type === 'medicines') {
+            elseif ($type === 'medicines_new') {
                 $meds = Brand::select('id', 'name', 'slug', 'updated_at')
                     ->offset($offset)->limit($this->chunkSize)->get();
                 foreach ($meds as $med) {
@@ -115,7 +116,7 @@ class SitemapController extends Controller
                     ];
                 }
             }
-            elseif ($type === 'medicines-bn') {
+            elseif ($type === 'medicines-bn_new') {
                 $meds = Brand::select('id', 'name', 'slug', 'bangla_name', 'updated_at')
                     ->whereNotNull('bangla_name')
                     ->offset($offset)->limit($this->chunkSize)->get();

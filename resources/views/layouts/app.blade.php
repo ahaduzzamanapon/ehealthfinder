@@ -99,7 +99,8 @@
                 <h3>For Patients</h3>
                 <ul class="footer-links">
                     <li><a href="{{ route('doctors.index') }}">🔍 Find a Doctor</a></li>
-                    <li><a href="{{ route('medicines.index') }}">💊 Medicine Index</a></li>
+                    <li><a href="{{ route('medicines.index') }}">💊 Medicine Search</a></li>
+                    <li><a href="{{ route('medicine.links') }}">📋 Medicine A-Z List</a></li>
                     <li><a href="{{ route('blog.index') }}">📰 Blog</a></li>
                     <li><a href="{{ route('doctors.index', ['specialty_id' => '']) }}">👨‍⚕️ All Specialties</a></li>
                     <li><a href="{{ route('home') }}#specialties">🏥 Browse by Specialty</a></li>

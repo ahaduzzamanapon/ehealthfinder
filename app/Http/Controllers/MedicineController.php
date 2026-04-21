@@ -3,6 +3,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use App\Models\Generic;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class MedicineController extends Controller
 {
@@ -37,5 +39,33 @@ class MedicineController extends Controller
         }
 
         return view('medicines.show', compact('brand', 'alternatives', 'isBangla'));
+    }
+
+    /** A-Z HTML index of all medicines — one page per letter */
+    public function links(Request $request)
+    {
+        $letter = strtoupper($request->get('letter', 'A'));
+        $letter = preg_match('/^[A-Z]$/', $letter) ? $letter : 'A';
+
+        // All unique first letters for the alphabet nav
+        $letters = Cache::remember('med_letters', 3600, function () {
+            return Brand::selectRaw('UPPER(LEFT(name,1)) as letter')
+                ->distinct()
+                ->orderByRaw('UPPER(LEFT(name,1))')
+                ->pluck('letter')
+                ->filter(fn($l) => preg_match('/^[A-Z]$/', $l))
+                ->values();
+        });
+
+        // All medicines starting with selected letter, paginated
+        $medicines = Brand::select('id','name','slug','dosage_form','company','price','strength')
+            ->whereRaw('UPPER(LEFT(name,1)) = ?', [$letter])
+            ->orderBy('name')
+            ->paginate(120)
+            ->withQueryString();
+
+        $totalCount = Cache::remember('med_total_count', 3600, fn() => Brand::count());
+
+        return view('medicines.links', compact('medicines', 'letter', 'letters', 'totalCount'));
     }
 }
