@@ -246,7 +246,7 @@
         "name"      => "eHealthFinder",
         "image"     => url('/logo.png'),
         "url"       => url('/'),
-        "telephone" => "+8801234567890",
+        "telephone" => "+8801737155233",
         "address"   => [
             "@type"          => "PostalAddress",
             "streetAddress"  => "Dhaka",

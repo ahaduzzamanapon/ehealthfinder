@@ -113,16 +113,26 @@
 
     $graph = [
         [
-            "@type" => "Article",
-            "headline" => $seoTitle,
-            "image" => asset('logo.png'),
-            "author" => ["@type" => "Organization", "name" => "eHealthFinder"],
-            "publisher" => [
-                "@type" => "Organization", "name" => "eHealthFinder",
-                "logo" => ["@type" => "ImageObject", "url" => asset('logo.png')]
+            "@type"            => "Article",
+            "@id"              => url('/doctors') . "#article",
+            "mainEntityOfPage" => ["@type" => "WebPage", "@id" => url('/doctors')],
+            "url"              => url('/doctors'),
+            "headline"         => $seoTitle,
+            "image"            => asset('logo.png'),
+            "author"           => [
+                "@type" => "Organization",
+                "name"  => "eHealthFinder",
+                "url"   => url('/'),
             ],
-            "datePublished" => date('Y-m-d'),
-            "description" => $seoDesc
+            "publisher" => [
+                "@type" => "Organization",
+                "name"  => "eHealthFinder",
+                "url"   => url('/'),
+                "logo"  => ["@type" => "ImageObject", "url" => asset('logo.png')],
+            ],
+            "datePublished" => now()->setTimezone('Asia/Dhaka')->toIso8601String(),
+            "dateModified"  => now()->setTimezone('Asia/Dhaka')->toIso8601String(),
+            "description"   => $seoDesc,
         ],
         [
             "@type" => "AggregateRating",

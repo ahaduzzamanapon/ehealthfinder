@@ -91,7 +91,7 @@
         "url"             => $docUrl,
         "name"            => $doctor->name . ' — ' . $specialty . ' in ' . $location,
         "description"     => $doctor->degrees . ($doctor->designation ? ', ' . $doctor->designation : '') . '. ' . $specialty . ' in ' . $location . ', Bangladesh.',
-        "dateModified"    => $doctor->updated_at->toIso8601String(),
+        "dateModified"    => $doctor->updated_at ? \Carbon\Carbon::parse($doctor->updated_at)->toIso8601String() : now()->toIso8601String(),
         "publisher"       => [
             "@type" => "Organization",
             "name"  => "eHealthFinder",
