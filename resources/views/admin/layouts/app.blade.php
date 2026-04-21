@@ -301,6 +301,11 @@ select.form-control option { background: #1e293b; color: white; }
             <span class="icon">📂</span> Categories
         </a>
 
+        <div class="nav-section-title">Analytics</div>
+        <a href="{{ route('admin.visitors.index') }}" class="nav-item {{ request()->routeIs('admin.visitors.*') ? 'active' : '' }}">
+            <span class="icon">📊</span> Visitor Analytics
+        </a>
+
         <div class="nav-section-title">Site</div>
         <a href="{{ url('/') }}" target="_blank" class="nav-item">
             <span class="icon">🌐</span> View Site

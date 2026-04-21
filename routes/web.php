@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\ChamberAdminController;
 use App\Http\Controllers\Admin\BlogCategoryAdminController;
 use App\Http\Controllers\Admin\BlogPostAdminController;
 use App\Http\Controllers\Admin\BrandScrapeController;
+use App\Http\Controllers\Admin\VisitorAnalyticsController;
 // ── ADMIN ROUTES ─────────────────────────────────────────
 Route::prefix('admin')->name('admin.')->group(function () {
     // Login (no auth needed)
@@ -81,6 +82,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/blog/posts/{post}/edit',    [BlogPostAdminController::class, 'edit'])->name('blog.posts.edit');
         Route::put('/blog/posts/{post}',         [BlogPostAdminController::class, 'update'])->name('blog.posts.update');
         Route::delete('/blog/posts/{post}',      [BlogPostAdminController::class, 'destroy'])->name('blog.posts.destroy');
+
+        // Visitor Analytics
+        Route::get('/visitors', [VisitorAnalyticsController::class, 'index'])->name('visitors.index');
     });
 });
 
