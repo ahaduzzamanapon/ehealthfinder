@@ -176,38 +176,39 @@
         $faqs[] = ["q" => $q, "a" => Str::limit($text_side_effects, 250)];
     }
 
-    $faqSchema = null;
-    if (count($faqs) > 0) {
-        $faqEntities = [];
-        foreach($faqs as $f) {
-            $faqEntities[] = [
-                "@type" => "Question",
-                "name" => $f['q'],
-                "acceptedAnswer" => ["@type" => "Answer", "text" => $f['a']]
-            ];
-        }
-        $faqSchema = [
-            "@context" => "https://schema.org",
-            "@type" => "FAQPage",
-            "mainEntity" => $faqEntities
+    // ── FAQ entities ──────────────────────────────────────────────
+    $faqEntities = [];
+    foreach ($faqs as $f) {
+        $faqEntities[] = [
+            "@type"          => "Question",
+            "name"           => $f['q'],
+            "acceptedAnswer" => ["@type" => "Answer", "text" => $f['a']],
         ];
     }
 
-    // WebPage node — Article-style @graph wrapper for Medicine page
+    // ── Common publisher ─────────────────────────────────────────
+    $publisher = [
+        "@type" => "Organization",
+        "name"  => "eHealthFinder",
+        "url"   => url('/'),
+        "logo"  => ["@type" => "ImageObject", "url" => url('/logo.png')],
+    ];
+
+    $pageUrl     = $isBangla ? $medUrlBn : $medUrl;
+    $dateModified = $brand->updated_at
+        ? \Carbon\Carbon::parse($brand->updated_at)->toIso8601String()
+        : now()->toIso8601String();
+
+    // ── 1. WebPage ────────────────────────────────────────────────
     $webPageNode = [
         "@type"        => "WebPage",
-        "@id"          => $isBangla ? $medUrlBn : $medUrl,
-        "url"          => $isBangla ? $medUrlBn : $medUrl,
+        "@id"          => $pageUrl,
+        "url"          => $pageUrl,
         "name"         => $titleStr,
         "description"  => $descStr,
-        "dateModified" => $brand->updated_at ? \Carbon\Carbon::parse($brand->updated_at)->toIso8601String() : now()->toIso8601String(),
-        "publisher"    => [
-            "@type" => "Organization",
-            "name"  => "eHealthFinder",
-            "url"   => url('/'),
-            "logo"  => ["@type" => "ImageObject", "url" => url('/logo.png')],
-        ],
-        "breadcrumb" => [
+        "dateModified" => $dateModified,
+        "publisher"    => $publisher,
+        "breadcrumb"   => [
             "@type"           => "BreadcrumbList",
             "itemListElement" => [
                 ["@type" => "ListItem", "position" => 1, "name" => "Home",      "item" => url('/')],
@@ -217,16 +218,71 @@
         ],
     ];
 
-    // Combine into single @graph — Google recommended
-    $graphSchema = [
-        "@context" => "https://schema.org",
-        "@graph"   => [$webPageNode, $drugSchema],
+    // ── 2. Article ────────────────────────────────────────────────
+    $articleNode = [
+        "@type"            => "Article",
+        "@id"              => $pageUrl . "#article",
+        "mainEntityOfPage" => ["@type" => "WebPage", "@id" => $pageUrl],
+        "url"              => $pageUrl,
+        "headline"         => $titleStr,
+        "image"            => $ogImg,
+        "datePublished"    => $brand->created_at
+            ? \Carbon\Carbon::parse($brand->created_at)->toIso8601String()
+            : $dateModified,
+        "dateModified"     => $dateModified,
+        "author"           => [
+            "@type" => "Person",
+            "name"  => "eHealthFinder Editorial Team",
+            "url"   => url('/about'),
+        ],
+        "publisher"    => $publisher,
+        "description"  => $descStr,
     ];
 
-    // Output combined schema array
-    $schemas = [$graphSchema];
-    if ($faqSchema) $schemas[] = $faqSchema;
-    $schemaJson = json_encode($schemas, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    // ── 3. LocalBusiness ──────────────────────────────────────────
+    $localBusinessNode = [
+        "@type"     => "LocalBusiness",
+        "@id"       => url('/') . "#localbusiness",
+        "name"      => "eHealthFinder",
+        "image"     => url('/logo.png'),
+        "url"       => url('/'),
+        "telephone" => "+8801234567890",
+        "address"   => [
+            "@type"          => "PostalAddress",
+            "streetAddress"  => "Dhaka",
+            "addressLocality"=> "Dhaka",
+            "postalCode"     => "1000",
+            "addressCountry" => "BD",
+        ],
+        "aggregateRating" => [
+            "@type"       => "AggregateRating",
+            "ratingValue" => "4.8",
+            "reviewCount" => "150",
+            "bestRating"  => "5",
+            "worstRating" => "1",
+        ],
+    ];
+
+    // ── 4. FAQPage ────────────────────────────────────────────────
+    $faqNode = null;
+    if (count($faqEntities) > 0) {
+        $faqNode = [
+            "@type"       => "FAQPage",
+            "@id"         => $pageUrl . "#faq",
+            "mainEntity"  => $faqEntities,
+        ];
+    }
+
+    // ── Single unified @graph ─────────────────────────────────────
+    $graphNodes = [$webPageNode, $drugSchema, $articleNode, $localBusinessNode];
+    if ($faqNode) $graphNodes[] = $faqNode;
+
+    $unifiedSchema = [
+        "@context" => "https://schema.org",
+        "@graph"   => $graphNodes,
+    ];
+
+    $schemaJson = json_encode($unifiedSchema, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
 @endphp
 
