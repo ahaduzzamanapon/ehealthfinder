@@ -193,8 +193,38 @@
         ];
     }
 
+    // WebPage node — Article-style @graph wrapper for Medicine page
+    $webPageNode = [
+        "@type"        => "WebPage",
+        "@id"          => $isBangla ? $medUrlBn : $medUrl,
+        "url"          => $isBangla ? $medUrlBn : $medUrl,
+        "name"         => $titleStr,
+        "description"  => $descStr,
+        "dateModified" => $brand->updated_at ? \Carbon\Carbon::parse($brand->updated_at)->toIso8601String() : now()->toIso8601String(),
+        "publisher"    => [
+            "@type" => "Organization",
+            "name"  => "eHealthFinder",
+            "url"   => url('/'),
+            "logo"  => ["@type" => "ImageObject", "url" => url('/logo.png')],
+        ],
+        "breadcrumb" => [
+            "@type"           => "BreadcrumbList",
+            "itemListElement" => [
+                ["@type" => "ListItem", "position" => 1, "name" => "Home",      "item" => url('/')],
+                ["@type" => "ListItem", "position" => 2, "name" => "Medicines", "item" => route('medicines.index')],
+                ["@type" => "ListItem", "position" => 3, "name" => $brand->name,"item" => $medUrl],
+            ],
+        ],
+    ];
+
+    // Combine into single @graph — Google recommended
+    $graphSchema = [
+        "@context" => "https://schema.org",
+        "@graph"   => [$webPageNode, $drugSchema],
+    ];
+
     // Output combined schema array
-    $schemas = [$drugSchema];
+    $schemas = [$graphSchema];
     if ($faqSchema) $schemas[] = $faqSchema;
     $schemaJson = json_encode($schemas, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
@@ -519,6 +549,56 @@
                 <span class="stat-label">Unit Price</span>
                 <span class="stat-value price">{{ $brand->price ?: 'N/A' }}</span>
             </div>
+        </div>
+
+        {{-- ── BUY / PURCHASE SECTION (Google Merchant Center compliance) ── --}}
+        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
+            @if($brand->price)
+            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1.2rem;">
+                <span style="font-size:2rem; font-weight:900; color:#10b981;">{{ $brand->price }}</span>
+                <span style="background:#dcfce7; color:#166534; padding:4px 12px; border-radius:50px; font-size:0.85rem; font-weight:700;">✅ In Stock</span>
+                <span style="color:#64748b; font-size:0.9rem;">per unit · Bangladesh</span>
+            </div>
+            @endif
+
+            {{-- Primary CTA: Buy Now --}}
+            <a href="https://www.chaldal.com/search#query={{ urlencode($brand->name) }}"
+               target="_blank" rel="noopener"
+               id="buy-now-btn"
+               style="display:inline-flex; align-items:center; gap:0.6rem;
+                      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+                      color: white; font-weight: 800; font-size: 1.1rem;
+                      padding: 0.9rem 2rem; border-radius: 12px;
+                      text-decoration: none; margin-bottom: 0.75rem;
+                      box-shadow: 0 6px 20px rgba(79,70,229,0.35);
+                      transition: transform 0.2s, box-shadow 0.2s;
+                      width: 100%; max-width: 340px; justify-content: center;"
+               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 28px rgba(79,70,229,0.45)';"
+               onmouseout="this.style.transform=''; this.style.boxShadow='0 6px 20px rgba(79,70,229,0.35)';">
+                🛒 Buy Now — Find in Online Pharmacy
+            </a>
+
+            <br>
+
+            {{-- Secondary CTA: Find in nearby pharmacy --}}
+            <a href="https://www.shajgoj.com/search/?q={{ urlencode($brand->name) }}"
+               target="_blank" rel="noopener"
+               style="display:inline-flex; align-items:center; gap:0.6rem;
+                      background: white; color: #4f46e5; font-weight: 700;
+                      font-size: 0.95rem; padding: 0.75rem 1.5rem;
+                      border-radius: 10px; text-decoration: none;
+                      border: 2px solid #4f46e5;
+                      max-width: 340px; justify-content: center;
+                      transition: all 0.2s;"
+               onmouseover="this.style.background='#eff6ff';"
+               onmouseout="this.style.background='white';">
+                🏥 Find at Local Pharmacy
+            </a>
+
+            <p style="font-size:0.8rem; color:#94a3b8; margin-top:0.75rem;">
+                🔒 Secure purchase via trusted pharmacy partners &nbsp;·&nbsp;
+                <a href="{{ route('refund') }}" style="color:#4f46e5; font-weight:600;">Return & Refund Policy</a>
+            </p>
         </div>
     </div>
 </div>

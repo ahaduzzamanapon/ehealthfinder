@@ -88,6 +88,7 @@ class SitemapController extends Controller
                     ['loc' => route('privacy'), 'changefreq' => 'monthly', 'priority' => '0.6'],
                     ['loc' => route('disclaimer'), 'changefreq' => 'monthly', 'priority' => '0.6'],
                     ['loc' => route('terms'), 'changefreq' => 'monthly', 'priority' => '0.6'],
+                    ['loc' => route('refund'), 'changefreq' => 'monthly', 'priority' => '0.7'],
                 ];
             } 
             elseif ($type === 'doctors') {

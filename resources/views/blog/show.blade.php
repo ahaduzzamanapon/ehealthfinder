@@ -38,57 +38,59 @@
     }
     $faqs = array_slice($faqs, 0, 4); // limit to 4
 
-    $docSchema = [
-        "@context" => "https://schema.org",
-        "@type" => "Article",
-        "mainEntityOfPage" => [
-            "@type" => "WebPage",
-            "@id" => url()->current()
-        ],
-        "headline" => $post->seo_title ?? $post->title,
-        "description" => $post->seo_description,
-        "image" => [
-            $post->featured_image ? url(Storage::url($post->featured_image)) : url('/default-og.png')
-        ],
-        "datePublished" => $post->created_at->toIso8601String(),
-        "dateModified" => $post->updated_at->toIso8601String(),
-        "author" => [
+    $postUrl     = url()->current();
+    $postImage   = $post->featured_image ? url(Storage::url($post->featured_image)) : url('/default-og.png');
+    $authorName  = $post->author_name ?? 'eHealthFinder Editorial Team';
+    $authorUrl   = url('/about'); // Author profile page
+
+    $articleSchema = [
+        "@type"           => "Article",
+        "@id"             => $postUrl . '#article',
+        "mainEntityOfPage"=> ["@type" => "WebPage", "@id" => $postUrl],
+        "url"             => $postUrl,
+        "headline"        => $post->seo_title ?? $post->title,
+        "image"           => $postImage,
+        "datePublished"   => $post->created_at->toIso8601String(),
+        "dateModified"    => $post->updated_at->toIso8601String(),
+        "author"          => [
             "@type" => "Person",
-            "name" => $post->author_name ?? 'eHealthFinder'
+            "name"  => $authorName,
+            "url"   => $authorUrl,
         ],
         "publisher" => [
             "@type" => "Organization",
-            "name" => "eHealthFinder",
-            "logo" => [
-                "@type" => "ImageObject",
-                "url" => url('/logo.png')
-            ]
-        ]
+            "name"  => "eHealthFinder",
+            "logo"  => ["@type" => "ImageObject", "url" => url('/logo.png')],
+        ],
+        "description" => $post->seo_description,
     ];
 
     if ($reviewCount > 0) {
-        $docSchema["aggregateRating"] = [
+        $articleSchema["aggregateRating"] = [
             "@type"       => "AggregateRating",
             "ratingValue" => number_format($avgRating, 1),
-            "reviewCount" => (string)$reviewCount
+            "reviewCount" => (string)$reviewCount,
         ];
     }
-    
+
     if ($firstReview) {
-        $docSchema["review"] = [
+        $articleSchema["review"] = [
             "@type"        => "Review",
             "reviewRating" => [
                 "@type"       => "Rating",
                 "ratingValue" => (string)$firstReview->rating,
-                "bestRating"  => "5"
+                "bestRating"  => "5",
             ],
-            "author"       => [
-                "@type" => "Person",
-                "name"  => $firstReview->author_name
-            ],
-            "reviewBody"   => strip_tags($firstReview->body ?? "Great article.")
+            "author"     => ["@type" => "Person", "name" => $firstReview->author_name],
+            "reviewBody" => strip_tags($firstReview->body ?? "Great article."),
         ];
     }
+
+    // @graph wrapper (Google recommended format)
+    $docSchema = [
+        "@context" => "https://schema.org",
+        "@graph"   => [$articleSchema],
+    ];
 
     $faqSchema = null;
     if (count($faqs) > 0) {
@@ -96,14 +98,14 @@
         foreach($faqs as $f) {
             $faqEntities[] = [
                 "@type" => "Question",
-                "name" => $f['q'],
-                "acceptedAnswer" => ["@type" => "Answer", "text" => $f['a']]
+                "name"  => $f['q'],
+                "acceptedAnswer" => ["@type" => "Answer", "text" => $f['a']],
             ];
         }
         $faqSchema = [
-            "@context" => "https://schema.org",
-            "@type" => "FAQPage",
-            "mainEntity" => $faqEntities
+            "@context"   => "https://schema.org",
+            "@type"      => "FAQPage",
+            "mainEntity" => $faqEntities,
         ];
     }
 

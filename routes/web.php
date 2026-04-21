@@ -106,6 +106,8 @@ Route::get('/about',       [StaticPageController::class, 'about'])->name('about'
 Route::get('/privacy',     [StaticPageController::class, 'privacy'])->name('privacy');
 Route::get('/disclaimer',  [StaticPageController::class, 'disclaimer'])->name('disclaimer');
 Route::get('/terms',       [StaticPageController::class, 'terms'])->name('terms');
+Route::get('/refund-policy', [StaticPageController::class, 'refund'])->name('refund');
+Route::get('/return-policy', fn() => redirect()->route('refund', [], 301));
 
 // Reviews
 Route::post('/reviews',    [\App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');

@@ -114,6 +114,7 @@
                     <li><a href="{{ route('privacy') }}">🔒 Privacy Policy</a></li>
                     <li><a href="{{ route('disclaimer') }}">⚠️ Disclaimer</a></li>
                     <li><a href="{{ route('terms') }}">📋 Terms of Use</a></li>
+                    <li><a href="{{ route('refund') }}">↩️ Return & Refund Policy</a></li>
                     <li><a href="mailto:contact@ehealthfinder.com">✉️ Contact Us</a></li>
                 </ul>
             </div>
@@ -137,6 +138,7 @@
                 &nbsp;|&nbsp; <a href="{{ route('privacy') }}" style="color:#94a3b8;">Privacy</a>
                 &nbsp;|&nbsp; <a href="{{ route('terms') }}" style="color:#94a3b8;">Terms</a>
                 &nbsp;|&nbsp; <a href="{{ route('disclaimer') }}" style="color:#94a3b8;">Disclaimer</a>
+                &nbsp;|&nbsp; <a href="{{ route('refund') }}" style="color:#94a3b8;">Return Policy</a>
             </p>
         </div>
     </footer>

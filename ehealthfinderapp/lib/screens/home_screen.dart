@@ -189,41 +189,56 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 12,
         children: items.asMap().entries.map((e) {
           final item = e.value;
-          return Expanded(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.border),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03),
-                    blurRadius: 8, offset: const Offset(0, 3))],
-              ),
-              child: Column(
-                children: [
-                  Icon(item['icon'] as IconData,
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: (MediaQuery.of(context).size.width - 32 - 12) / 2, // 2 items per row
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.border),
+              boxShadow: [BoxShadow(color: Colors.black.withAlpha(8),
+                  blurRadius: 12, offset: const Offset(0, 4))],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: (item['color'] as Color).withAlpha(25),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(item['icon'] as IconData,
                       color: item['color'] as Color, size: 22),
-                  const SizedBox(height: 6),
-                  Text(item['value'] as String, style: TextStyle(
-                    fontWeight: FontWeight.w800, fontSize: 13,
-                    color: item['color'] as Color,
-                  )),
-                  const SizedBox(height: 2),
-                  Text(item['label'] as String,
-                      style: const TextStyle(color: AppColors.textLight, fontSize: 10),
-                      textAlign: TextAlign.center),
-                ],
-              ),
-            )
-                .animate(delay: (e.key * 80).ms)
-                .fadeIn(duration: 400.ms)
-                .slideY(begin: 0.2),
-          );
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(item['value'] as String, style: TextStyle(
+                        fontWeight: FontWeight.w800, fontSize: 16,
+                        color: item['color'] as Color,
+                      )),
+                      const SizedBox(height: 2),
+                      Text(item['label'] as String,
+                          style: const TextStyle(color: AppColors.textMed, fontSize: 11.5, fontWeight: FontWeight.w500),
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          )
+              .animate(delay: (e.key * 80).ms)
+              .fadeIn(duration: 400.ms)
+              .slideY(begin: 0.2);
         }).toList(),
       ),
     );
@@ -241,50 +256,57 @@ class _HomeScreenState extends State<HomeScreen> {
        'color': const Color(0xFFF59E0B), 'bg': const Color(0xFFFFFBEB)},
     ];
 
-    return Padding(
+    return Container(
+      height: 105,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
         children: cats.asMap().entries.map((e) {
           final cat = e.value;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () {
-                if (cat['label'] == 'Medicines') {
-                  Navigator.push(context, MaterialPageRoute(
-                      builder: (_) => const MedicineListScreen()));
-                } else if (cat['label'] == 'Doctors') {
-                  Navigator.push(context, MaterialPageRoute(
-                      builder: (_) => const DoctorListScreen()));
-                }
-              },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
-                  color: cat['bg'] as Color,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                      color: (cat['color'] as Color).withOpacity(0.15)),
-                ),
-                child: Column(
-                  children: [
-                    Icon(cat['icon'] as IconData,
-                        color: cat['color'] as Color, size: 26),
-                    const SizedBox(height: 6),
-                    Text(cat['label'] as String,
-                        style: TextStyle(
-                          color: cat['color'] as Color,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        )),
-                  ],
-                ),
-              )
-                  .animate(delay: (e.key * 70 + 200).ms)
-                  .scale(duration: 400.ms, curve: Curves.elasticOut,
-                      begin: const Offset(0.7, 0.7))
-                  .fade(duration: 300.ms),
-            ),
+          return GestureDetector(
+            onTap: () {
+              if (cat['label'] == 'Medicines') {
+                Navigator.push(context, MaterialPageRoute(
+                    builder: (_) => const MedicineListScreen()));
+              } else if (cat['label'] == 'Doctors') {
+                Navigator.push(context, MaterialPageRoute(
+                    builder: (_) => const DoctorListScreen()));
+              }
+            },
+            child: Container(
+              width: 90,
+              margin: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: cat['bg'] as Color,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                    color: (cat['color'] as Color).withAlpha(40), width: 1.5),
+                boxShadow: [BoxShadow(color: (cat['color'] as Color).withAlpha(15), 
+                    blurRadius: 10, offset: const Offset(0, 4))],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(cat['icon'] as IconData,
+                      color: cat['color'] as Color, size: 28),
+                  const SizedBox(height: 8),
+                  Text(cat['label'] as String,
+                      style: TextStyle(
+                        color: cat['color'] as Color,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1),
+                ],
+              ),
+            )
+                .animate(delay: (e.key * 70 + 200).ms)
+                .scale(duration: 400.ms, curve: Curves.elasticOut,
+                    begin: const Offset(0.7, 0.7))
+                .fade(duration: 300.ms),
           );
         }).toList(),
       ),
@@ -312,7 +334,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildMedicineRow(List<MedicineModel> meds) {
     return SizedBox(
-      height: 170,
+      height: 220,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -383,32 +405,38 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => DoctorDetailScreen(doctorId: d.id))),
             child: Container(
-              margin: const EdgeInsets.only(bottom: 10),
+              margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.border),
+                boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))],
               ),
               child: Row(
                 children: [
                   _buildDocAvatar(d),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                   Expanded(child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(d.name, style: const TextStyle(
-                          fontWeight: FontWeight.w700, fontSize: 14)),
+                          fontWeight: FontWeight.w800, fontSize: 14.5, color: AppColors.textDark),
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: 3),
                       if (d.specialty != null)
                         Text(d.specialty!, style: const TextStyle(
-                            color: AppColors.secondary, fontSize: 12)),
+                            color: AppColors.secondary, fontSize: 12.5, fontWeight: FontWeight.w600),
+                            maxLines: 1, overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: 2),
                       if (d.location != null)
                         Text('📍 ${d.location!}', style: const TextStyle(
-                            color: AppColors.textMed, fontSize: 11)),
+                            color: AppColors.textLight, fontSize: 11),
+                            maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
                   )),
                   const Icon(Icons.arrow_forward_ios_rounded,
-                      size: 13, color: AppColors.textLight),
+                      size: 14, color: AppColors.textLight),
                 ],
               ),
             )

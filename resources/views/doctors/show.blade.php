@@ -54,46 +54,65 @@
         $chambers[] = $c;
     }
 
-    // Builder Physician Schema
-    $docSchema = [
-        '@context'        => 'https://schema.org',
+    // Physician node
+    $physicianNode = [
         '@type'           => 'Physician',
+        '@id'             => $docUrl . '#physician',
         'name'            => $doctor->name,
         'description'     => $doctor->degrees . ($doctor->designation ? ' – ' . $doctor->designation : ''),
-        '@id'             => $docUrl,
         'url'             => $docUrl,
         'medicalSpecialty'=> $specialty,
         'address'         => ['@type' => 'PostalAddress', 'addressLocality' => $location, 'addressCountry' => 'BD'],
     ];
     if ($imgUrl) {
-        $docSchema['image'] = [
-            '@type' => 'ImageObject',
-            'url' => $imgUrl
-        ];
+        $physicianNode['image'] = ['@type' => 'ImageObject', 'url' => $imgUrl];
     }
-    if (!empty($chambers)) $docSchema['location'] = $chambers;
+    if (!empty($chambers)) $physicianNode['location'] = $chambers;
 
-    // Always include aggregateRating: fallback values still show stars in SERP
-    $docSchema["aggregateRating"] = [
+    // AggregateRating
+    $physicianNode["aggregateRating"] = [
         "@type"       => "AggregateRating",
         "ratingValue" => number_format($avgRating, 1),
-        "reviewCount" => (string)$reviewCount
+        "reviewCount" => (string)$reviewCount,
     ];
     if ($firstReview) {
-        $docSchema["review"] = [
+        $physicianNode["review"] = [
             "@type"        => "Review",
-            "reviewRating" => [
-                "@type"       => "Rating",
-                "ratingValue" => (string)$firstReview->rating,
-                "bestRating"  => "5"
-            ],
-            "author"       => [
-                "@type" => "Person",
-                "name"  => $firstReview->author_name
-            ],
-            "reviewBody"   => strip_tags($firstReview->body ?? "Great doctor.")
+            "reviewRating" => ["@type" => "Rating", "ratingValue" => (string)$firstReview->rating, "bestRating" => "5"],
+            "author"       => ["@type" => "Person", "name" => $firstReview->author_name],
+            "reviewBody"   => strip_tags($firstReview->body ?? "Great doctor."),
         ];
     }
+
+    // WebPage node (Article-style @graph for Google)
+    $webPageNode = [
+        "@type"           => "WebPage",
+        "@id"             => $docUrl,
+        "url"             => $docUrl,
+        "name"            => $doctor->name . ' — ' . $specialty . ' in ' . $location,
+        "description"     => $doctor->degrees . ($doctor->designation ? ', ' . $doctor->designation : '') . '. ' . $specialty . ' in ' . $location . ', Bangladesh.',
+        "dateModified"    => $doctor->updated_at->toIso8601String(),
+        "publisher"       => [
+            "@type" => "Organization",
+            "name"  => "eHealthFinder",
+            "url"   => url('/'),
+            "logo"  => ["@type" => "ImageObject", "url" => url('/logo.png')],
+        ],
+        "breadcrumb" => [
+            "@type"           => "BreadcrumbList",
+            "itemListElement" => [
+                ["@type" => "ListItem", "position" => 1, "name" => "Home",    "item" => url('/')],
+                ["@type" => "ListItem", "position" => 2, "name" => "Doctors", "item" => route('doctors.index')],
+                ["@type" => "ListItem", "position" => 3, "name" => $doctor->name, "item" => $docUrl],
+            ],
+        ],
+    ];
+
+    // @graph — wraps all nodes together (Google recommended)
+    $docSchema = [
+        "@context" => "https://schema.org",
+        "@graph"   => [$webPageNode, $physicianNode],
+    ];
 
     // FAQ Schema
     $faqSchema = null;
@@ -101,16 +120,12 @@
         $faqEntities = [];
         foreach($faqs as $f) {
             $faqEntities[] = [
-                "@type" => "Question",
-                "name" => $f['q'],
-                "acceptedAnswer" => ["@type" => "Answer", "text" => $f['a']]
+                "@type"           => "Question",
+                "name"            => $f['q'],
+                "acceptedAnswer"  => ["@type" => "Answer", "text" => $f['a']],
             ];
         }
-        $faqSchema = [
-            "@context" => "https://schema.org",
-            "@type" => "FAQPage",
-            "mainEntity" => $faqEntities
-        ];
+        $faqSchema = ["@context" => "https://schema.org", "@type" => "FAQPage", "mainEntity" => $faqEntities];
     }
 
     // Combine schemas
