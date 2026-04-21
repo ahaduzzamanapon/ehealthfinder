@@ -5,33 +5,37 @@
 @section('canonical', route('medicine.links', ['letter' => $letter]))
 
 @section('schema')
+@verbatim
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "WebPage",
+@endverbatim
       "@id": "{{ route('medicine.links', ['letter' => $letter]) }}",
       "url": "{{ route('medicine.links', ['letter' => $letter]) }}",
       "name": "All Medicines A-Z — Letter {{ $letter }} | eHealthFinder",
       "description": "Complete medicine index for letter {{ $letter }} on eHealthFinder Bangladesh.",
+@verbatim
       "publisher": {
         "@type": "Organization",
         "name": "eHealthFinder",
-        "logo": { "@type": "ImageObject", "url": "{{ url('/logo.png') }}" }
+        "logo": { "@type": "ImageObject", "url": "/logo.png" }
       },
       "breadcrumb": {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Home",      "item": "{{ url('/') }}" },
-          { "@type": "ListItem", "position": 2, "name": "Medicines", "item": "{{ route('medicines.index') }}" },
-          { "@type": "ListItem", "position": 3, "name": "Medicine Index A-Z", "item": "{{ route('medicine.links') }}" }
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "/" },
+          { "@type": "ListItem", "position": 2, "name": "Medicines", "item": "/medicines" },
+          { "@type": "ListItem", "position": 3, "name": "Medicine Index A-Z", "item": "/medicine-index" }
         ]
       }
     }
   ]
 }
 </script>
+@endverbatim
 @endsection
 
 @section('content')
