@@ -297,6 +297,9 @@ select.form-control option { background: #1e293b; color: white; }
         <a href="{{ route('admin.blog.posts.index') }}" class="nav-item {{ request()->routeIs('admin.blog.posts.*') ? 'active' : '' }}">
             <span class="icon">📝</span> Blog Posts
         </a>
+        <a href="{{ route('admin.blog.ai-writer') }}" class="nav-item {{ request()->routeIs('admin.blog.ai-writer*') ? 'active' : '' }}">
+            <span class="icon">🤖</span> AI Blog Writer
+        </a>
         <a href="{{ route('admin.blog.categories.index') }}" class="nav-item {{ request()->routeIs('admin.blog.categories.*') ? 'active' : '' }}">
             <span class="icon">📂</span> Categories
         </a>

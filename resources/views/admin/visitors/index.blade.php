@@ -6,11 +6,55 @@
 <style>
 * { box-sizing: border-box; }
 .va-wrap { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
-
-/* Page Header */
-.va-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+.va-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
 .va-header h1 { font-size: 1.6rem; font-weight: 800; color: #1e1b4b; margin: 0; display: flex; align-items: center; gap: .6rem; }
 .va-badge { background: #eef2ff; color: #4f46e5; font-size: .75rem; font-weight: 700; padding: .3rem .8rem; border-radius: 99px; }
+.va-actions { display: flex; flex-direction: column; align-items: flex-end; gap: .6rem; }
+.resolve-btn {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff; font-weight: 700; font-size: .88rem;
+    padding: .65rem 1.25rem; border-radius: 10px; border: none;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(79,70,229,.3);
+    transition: transform .15s, box-shadow .15s; text-decoration: none;
+}
+.resolve-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(79,70,229,.4); }
+.cron-box {
+    background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px;
+    padding: .6rem 1rem; font-size: .75rem; color: #64748b; max-width: 420px;
+}
+.cron-box code { font-family: monospace; font-size: .72rem; color: #4f46e5; word-break: break-all; }
+</style>
+
+<div class="va-wrap">
+
+    {{-- Header --}}
+    <div class="va-header">
+        <div>
+            <h1>📊 Visitor Analytics <span class="va-badge">Live</span></h1>
+            <div style="font-size:.82rem;color:#94a3b8;margin-top:.35rem;">Last updated: {{ now()->format('d M Y, h:i A') }}</div>
+        </div>
+        <div class="va-actions">
+            {{-- Resolve Geo Button --}}
+            <form method="POST" action="{{ route('admin.visitors.resolve-geo') }}">
+                @csrf
+                <button type="submit" class="resolve-btn">
+                    🌍 Resolve Geo
+                    @if($unresolvedCount > 0)
+                        <span style="background:rgba(255,255,255,.25);border-radius:99px;padding:.1rem .55rem;font-size:.75rem;">{{ $unresolvedCount }} pending</span>
+                    @else
+                        <span style="background:rgba(255,255,255,.15);border-radius:99px;padding:.1rem .55rem;font-size:.75rem;">✅ All resolved</span>
+                    @endif
+                </button>
+            </form>
+            {{-- Cron URL --}}
+            <div class="cron-box">
+                🕐 <strong>Cron job URL:</strong><br>
+                <code>{{ $cronUrl }}</code>
+            </div>
+        </div>
+    </div>
+
 
 /* Stat Cards */
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }

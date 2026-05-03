@@ -52,12 +52,12 @@ class VisitorAnalyticsController extends \App\Http\Controllers\Controller
 
     public function index(Request $request)
     {
-        // Resolve geo for unresolved IPs first
-        $this->resolveGeo();
-
         $today     = now()->toDateString();
         $yesterday = now()->subDay()->toDateString();
         $weekStart = now()->startOfWeek()->toDateString();
+
+        // Unresolved count to show on button
+        $unresolvedCount = PageVisit::whereNull('country')->whereNotNull('ip')->distinct('ip')->count('ip');
 
         // ── Visitor counts ───────────────────────────────────────
         $todayCount     = PageVisit::whereDate('visited_date', $today)->count();
@@ -101,11 +101,30 @@ class VisitorAnalyticsController extends \App\Http\Controllers\Controller
         // ── Recent visits (last 100) ────────────────────────────
         $recentVisits = PageVisit::orderByDesc('created_at')->limit(100)->get();
 
+        $cronUrl = url('/cron/resolve-geo?token=' . env('SCRAPE_TOKEN'));
+
         return view('admin.visitors.index', compact(
             'todayCount', 'yesterdayCount', 'weekCount', 'totalCount',
             'todayUnique', 'yesterdayUnique', 'weekUnique',
             'countryStats', 'chartDays', 'pageTypeStats', 'recentVisits',
-            'today', 'yesterday'
+            'today', 'yesterday', 'unresolvedCount', 'cronUrl'
         ));
+    }
+
+    /** POST /admin/visitors/resolve-geo — manual button */
+    public function resolveGeoAction()
+    {
+        $this->resolveGeo();
+        return redirect()->route('admin.visitors.index')->with('success', 'Geo resolved for up to 40 IPs!');
+    }
+
+    /** GET /cron/resolve-geo?token=xxx — server cron endpoint */
+    public function resolveGeoCron(Request $request)
+    {
+        if ($request->query('token') !== env('SCRAPE_TOKEN')) {
+            abort(403, 'Unauthorized');
+        }
+        $this->resolveGeo();
+        return response()->json(['status' => 'ok', 'resolved_at' => now()->toIso8601String()]);
     }
 }

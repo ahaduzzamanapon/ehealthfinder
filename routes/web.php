@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\BlogCategoryAdminController;
 use App\Http\Controllers\Admin\BlogPostAdminController;
 use App\Http\Controllers\Admin\BrandScrapeController;
 use App\Http\Controllers\Admin\VisitorAnalyticsController;
+use App\Http\Controllers\Admin\AiBlogWriterController;
 // ── ADMIN ROUTES ─────────────────────────────────────────
 Route::prefix('admin')->name('admin.')->group(function () {
     // Login (no auth needed)
@@ -84,9 +85,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/blog/posts/{post}',      [BlogPostAdminController::class, 'destroy'])->name('blog.posts.destroy');
 
         // Visitor Analytics
-        Route::get('/visitors', [VisitorAnalyticsController::class, 'index'])->name('visitors.index');
+        Route::get('/visitors',             [VisitorAnalyticsController::class, 'index'])->name('visitors.index');
+        Route::post('/visitors/resolve-geo',[VisitorAnalyticsController::class, 'resolveGeoAction'])->name('visitors.resolve-geo');
+
+        // AI Blog Writer
+        Route::get('/blog/ai-writer',          [AiBlogWriterController::class, 'index'])->name('blog.ai-writer');
+        Route::post('/blog/ai-writer/generate',[AiBlogWriterController::class, 'generate'])->name('blog.ai-writer.generate');
+        Route::post('/blog/ai-writer/publish', [AiBlogWriterController::class, 'publish'])->name('blog.ai-writer.publish');
     });
 });
+
+// ── CRON: Geo resolver (called by server cron) ────────────────
+Route::get('/cron/resolve-geo', [VisitorAnalyticsController::class, 'resolveGeoCron'])->name('cron.resolve-geo');
 
 
 // ── CRON: Brand scraper (protected by token) ─────────────
