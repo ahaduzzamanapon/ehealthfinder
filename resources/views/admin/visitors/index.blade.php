@@ -1,9 +1,10 @@
 @extends('admin.layouts.app')
-
 @section('title', 'Visitor Analytics')
+@section('page-title', 'Visitor Analytics')
 
 @section('content')
 <style>
+    
 * { box-sizing: border-box; }
 .va-wrap { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
 .va-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
