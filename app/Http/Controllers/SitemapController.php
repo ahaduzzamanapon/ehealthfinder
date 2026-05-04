@@ -105,11 +105,11 @@ class SitemapController extends Controller
                 }
             } 
             elseif ($type === 'medicines_new') {
-                $meds = Brand::select('id', 'name', 'slug', 'updated_at')
+                $meds = Brand::select('id', 'name', 'dosage_form', 'updated_at')
                     ->offset($offset)->limit($this->chunkSize)->get();
                 foreach ($meds as $med) {
                     $items[] = [
-                        'loc'        => route('medicine.show', ['id' => $med->id, 'slug' => $med->slug ?? Str::slug($med->name)]),
+                        'loc'        => route('medicine.show', ['id' => $med->id, 'slug' => $med->slug]),
                         'lastmod'    => $med->updated_at ? \Carbon\Carbon::parse($med->updated_at)->toAtomString() : $now,
                         'changefreq' => 'weekly',
                         'priority'   => '0.7'
@@ -117,12 +117,12 @@ class SitemapController extends Controller
                 }
             }
             elseif ($type === 'medicines-bn_new') {
-                $meds = Brand::select('id', 'name', 'slug', 'bangla_name', 'updated_at')
+                $meds = Brand::select('id', 'name', 'dosage_form', 'bangla_name', 'updated_at')
                     ->whereNotNull('bangla_name')
                     ->offset($offset)->limit($this->chunkSize)->get();
                 foreach ($meds as $med) {
                     $items[] = [
-                        'loc'        => route('medicine.show.bn', ['id' => $med->id, 'slug' => $med->slug ?? Str::slug($med->name)]),
+                        'loc'        => route('medicine.show.bn', ['id' => $med->id, 'slug' => $med->slug]),
                         'lastmod'    => $med->updated_at ? \Carbon\Carbon::parse($med->updated_at)->toAtomString() : $now,
                         'changefreq' => 'weekly',
                         'priority'   => '0.7'
@@ -224,12 +224,12 @@ class SitemapController extends Controller
                 });
 
             // 3. Medicines (English)
-            Brand::select('id', 'name', 'slug', 'updated_at')
+            Brand::select('id', 'name', 'dosage_form', 'updated_at')
                 ->orderBy('id')
                 ->chunk(500, function ($meds) use (&$items, $now) {
                     foreach ($meds as $med) {
                         $items[] = [
-                            'loc'        => route('medicine.show', ['id' => $med->id, 'slug' => $med->slug ?? Str::slug($med->name)]),
+                            'loc'        => route('medicine.show', ['id' => $med->id, 'slug' => $med->slug]),
                             'lastmod'    => $med->updated_at ? \Carbon\Carbon::parse($med->updated_at)->toAtomString() : $now,
                             'changefreq' => 'weekly',
                             'priority'   => '0.7',
@@ -238,13 +238,13 @@ class SitemapController extends Controller
                 });
 
             // 4. Medicines (Bangla /bn URLs)
-            Brand::select('id', 'name', 'slug', 'bangla_name', 'updated_at')
+            Brand::select('id', 'name', 'dosage_form', 'bangla_name', 'updated_at')
                 ->whereNotNull('bangla_name')
                 ->orderBy('id')
                 ->chunk(500, function ($meds) use (&$items, $now) {
                     foreach ($meds as $med) {
                         $items[] = [
-                            'loc'        => route('medicine.show.bn', ['id' => $med->id, 'slug' => $med->slug ?? Str::slug($med->name)]),
+                            'loc'        => route('medicine.show.bn', ['id' => $med->id, 'slug' => $med->slug]),
                             'lastmod'    => $med->updated_at ? \Carbon\Carbon::parse($med->updated_at)->toAtomString() : $now,
                             'changefreq' => 'weekly',
                             'priority'   => '0.7',
