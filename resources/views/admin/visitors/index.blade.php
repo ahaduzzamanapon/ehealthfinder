@@ -4,7 +4,7 @@
 
 @section('content')
 <style>
-    
+
 * { box-sizing: border-box; }
 .va-wrap { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
 .va-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
@@ -55,7 +55,7 @@
             </div>
         </div>
     </div>
-
+<style>
 
 /* Stat Cards */
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
