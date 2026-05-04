@@ -104,9 +104,10 @@ Route::get('/cron/resolve-geo', [VisitorAnalyticsController::class, 'resolveGeoC
 Route::get('/cron/scrape-brand',   [BrandScrapeController::class, 'scrapeOne'])->name('cron.scrape');
 Route::get('/cron/scrape-progress',[BrandScrapeController::class, 'progress'])->name('cron.progress');
 
-Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/sitemap.xml',  [SitemapController::class, 'index'])->name('sitemap.index');
 Route::get('/sitemap/{type}/{page}.xml', [SitemapController::class, 'show'])->name('sitemap.show');
-Route::get('/robots.txt',  [SitemapController::class, 'robots']);
+Route::get('/sitemap2.xml', [SitemapController::class, 'sitemap2'])->name('sitemap2');
+Route::get('/robots.txt',   [SitemapController::class, 'robots']);
 
 Route::get('/', [SearchController::class, 'home'])->name('home');
 Route::get('/doctors', [SearchController::class, 'searchDoctors'])->name('doctors.index');

@@ -190,6 +190,127 @@ class SitemapController extends Controller
         return response($content, 200)->header('Content-Type', 'application/xml');
     }
 
+    public function sitemap2()
+    {
+        $urls = Cache::remember('sitemap2_all', 60 * 60 * 12, function () {
+            $items = [];
+            $now   = now()->toAtomString();
+
+            // 1. General / static pages
+            $items[] = ['loc' => route('home'),             'changefreq' => 'daily',   'priority' => '1.0'];
+            $items[] = ['loc' => route('doctors.index'),   'changefreq' => 'daily',   'priority' => '0.9'];
+            $items[] = ['loc' => route('medicines.index'), 'changefreq' => 'daily',   'priority' => '0.9'];
+            $items[] = ['loc' => route('medicine.links'),  'changefreq' => 'daily',   'priority' => '0.9'];
+            $items[] = ['loc' => route('blog.index'),      'changefreq' => 'daily',   'priority' => '0.9'];
+            $items[] = ['loc' => route('about'),           'changefreq' => 'monthly', 'priority' => '0.6'];
+            $items[] = ['loc' => route('privacy'),         'changefreq' => 'monthly', 'priority' => '0.6'];
+            $items[] = ['loc' => route('disclaimer'),      'changefreq' => 'monthly', 'priority' => '0.6'];
+            $items[] = ['loc' => route('terms'),           'changefreq' => 'monthly', 'priority' => '0.6'];
+            $items[] = ['loc' => route('refund'),          'changefreq' => 'monthly', 'priority' => '0.7'];
+
+            // 2. Doctors
+            Doctor::with(['specialty', 'location'])
+                ->select('id', 'name', 'specialty_id', 'location_id', 'updated_at')
+                ->orderBy('id')
+                ->chunk(500, function ($docs) use (&$items, $now) {
+                    foreach ($docs as $doc) {
+                        $items[] = [
+                            'loc'        => route('doctor.show', ['idslug' => $doc->seo_slug]),
+                            'lastmod'    => $doc->updated_at ? \Carbon\Carbon::parse($doc->updated_at)->toAtomString() : $now,
+                            'changefreq' => 'weekly',
+                            'priority'   => '0.8',
+                        ];
+                    }
+                });
+
+            // 3. Medicines (English)
+            Brand::select('id', 'name', 'slug', 'updated_at')
+                ->orderBy('id')
+                ->chunk(500, function ($meds) use (&$items, $now) {
+                    foreach ($meds as $med) {
+                        $items[] = [
+                            'loc'        => route('medicine.show', ['id' => $med->id, 'slug' => $med->slug ?? Str::slug($med->name)]),
+                            'lastmod'    => $med->updated_at ? \Carbon\Carbon::parse($med->updated_at)->toAtomString() : $now,
+                            'changefreq' => 'weekly',
+                            'priority'   => '0.7',
+                        ];
+                    }
+                });
+
+            // 4. Medicines (Bangla /bn URLs)
+            Brand::select('id', 'name', 'slug', 'bangla_name', 'updated_at')
+                ->whereNotNull('bangla_name')
+                ->orderBy('id')
+                ->chunk(500, function ($meds) use (&$items, $now) {
+                    foreach ($meds as $med) {
+                        $items[] = [
+                            'loc'        => route('medicine.show.bn', ['id' => $med->id, 'slug' => $med->slug ?? Str::slug($med->name)]),
+                            'lastmod'    => $med->updated_at ? \Carbon\Carbon::parse($med->updated_at)->toAtomString() : $now,
+                            'changefreq' => 'weekly',
+                            'priority'   => '0.7',
+                        ];
+                    }
+                });
+
+            // 5. Locations
+            $locations = DB::table('doctors')->select('location_id')->distinct()->whereNotNull('location_id')->get();
+            foreach ($locations as $l) {
+                $items[] = [
+                    'loc'        => \App\Helpers\SeoHelper::getSeoUrl(null, $l->location_id),
+                    'changefreq' => 'weekly',
+                    'priority'   => '0.8',
+                ];
+            }
+
+            // 6. Specialties
+            $specialties = DB::table('doctors')->select('specialty_id')->distinct()->whereNotNull('specialty_id')->get();
+            foreach ($specialties as $s) {
+                $items[] = [
+                    'loc'        => \App\Helpers\SeoHelper::getSeoUrl($s->specialty_id, null),
+                    'changefreq' => 'weekly',
+                    'priority'   => '0.8',
+                ];
+            }
+
+            // 7. Combinations (Specialty + Location)
+            DB::table('doctors')
+                ->select('location_id', 'specialty_id')
+                ->distinct()
+                ->whereNotNull('location_id')
+                ->whereNotNull('specialty_id')
+                ->orderBy('specialty_id')
+                ->chunk(500, function ($combos) use (&$items) {
+                    foreach ($combos as $c) {
+                        $items[] = [
+                            'loc'        => \App\Helpers\SeoHelper::getSeoUrl($c->specialty_id, $c->location_id),
+                            'changefreq' => 'weekly',
+                            'priority'   => '0.9',
+                        ];
+                    }
+                });
+
+            // 8. Blog Posts
+            BlogPost::select('slug', 'updated_at')
+                ->where('is_published', 1)
+                ->orderBy('id')
+                ->chunk(500, function ($blogs) use (&$items, $now) {
+                    foreach ($blogs as $blog) {
+                        $items[] = [
+                            'loc'        => route('blog.show', ['slug' => $blog->slug]),
+                            'lastmod'    => $blog->updated_at ? \Carbon\Carbon::parse($blog->updated_at)->toAtomString() : $now,
+                            'changefreq' => 'weekly',
+                            'priority'   => '0.8',
+                        ];
+                    }
+                });
+
+            return $items;
+        });
+
+        $content = view('sitemap-chunk', ['urls' => $urls])->render();
+        return response($content, 200)->header('Content-Type', 'application/xml');
+    }
+
     public function robots()
     {
         $content = "User-agent: *\nAllow: /\n\nSitemap: " . url('/sitemap.xml') . "\n";
