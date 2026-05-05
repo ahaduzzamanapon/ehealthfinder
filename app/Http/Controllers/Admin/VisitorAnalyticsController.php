@@ -121,7 +121,6 @@ class VisitorAnalyticsController extends \App\Http\Controllers\Controller
     /** GET /cron/resolve-geo?token=xxx — server cron endpoint */
     public function resolveGeoCron(Request $request)
     {
-       
         $this->resolveGeo();
         return response()->json(['status' => 'ok', 'resolved_at' => now()->toIso8601String()]);
     }

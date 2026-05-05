@@ -58,12 +58,9 @@
         src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
 </script>
 <meta name="google-adsense-account" content="ca-pub-8135122441154292">
-<script src="https://quge5.com/88/tag.min.js" data-zone="235760" async data-cfasync="false"></script>
 </head>
 <body>
-<amp-auto-ads type="adsense"
-        data-ad-client="ca-pub-8135122441154292">
-</amp-auto-ads>
+
     <header>
         <div class="nav-container">
             <a href="{{ route('home') }}" class="logo" style="-webkit-text-fill-color:initial; background:none;">
